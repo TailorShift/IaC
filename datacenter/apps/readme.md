@@ -1,0 +1,1 @@
+All custom applications to be deployed, need an `Application` kind resource here.

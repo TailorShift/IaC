@@ -1,0 +1,1 @@
+All services should put there resources here and get referenced in the `../apps` folder.
