@@ -1,0 +1,3 @@
+# Don't checkin Chart local version pins and dependency archives
+*/charts/*/Charts.lock
+*/charts/*/charts/*
