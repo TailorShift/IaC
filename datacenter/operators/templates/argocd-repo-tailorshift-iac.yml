@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-repo-tailorshift-iac
+  namespace: atos-development
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
+  url: https://github.com/TailorShift/IaC.git
+  password: ACD_CFG_REPO_TOKEN
+  username: tokenauth
