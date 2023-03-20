@@ -1,0 +1,7 @@
+kind: Issuer
+apiVersion: cert-manager.io/v1
+metadata:
+  name: self-signed-issuer
+  namespace: atos-development
+spec:
+  selfSigned: {}
