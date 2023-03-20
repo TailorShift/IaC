@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-aoa
+  namespace: atos-development
+spec:
+  destination:
+    namespace: atos-development
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: datacenter/apps
+    repoURL: git@github.com:TailorShift/IaC.git
+    targetRevision: HEAD

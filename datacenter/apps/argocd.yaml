@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: atos-development
+spec:
+  destination:
+    namespace: atos-development
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: datacenter/charts/argocd
+    repoURL: git@github.com:TailorShift/IaC.git
+    targetRevision: HEAD
+  ignoreDifferences:
+    - kind: Secret
+      name: argocd-repo-iac
+      jsonPointers:
+      - /data/sshPrivateKey
+    
