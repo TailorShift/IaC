@@ -13,8 +13,9 @@ spec:
     repoURL: git@github.com:TailorShift/IaC.git
     targetRevision: HEAD
   ignoreDifferences:
-    - kind: Secret
+    - group: ""
+      kind: Secret
       name: argocd-repo-iac
       jsonPointers:
-      - /data/sshPrivateKey
+        - /data/sshPrivateKey
     
