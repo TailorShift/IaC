@@ -6,7 +6,8 @@ metadata:
     strimzi.io/use-connector-resources: "true" 
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  version: "3.00"
+  version: "3.3.1"
+  replicas: 1
   bootstrapServers: kafka-datacenter-kafka-bootstrap:9093
   build: 
     output: 
