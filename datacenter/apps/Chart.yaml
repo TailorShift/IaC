@@ -1,6 +1,6 @@
 apiVersion: v2
-name: argocd
-description: Operator configuration for OpenShift
+name: apps
+description: applications to be deloyed
 
 # A chart can be either an 'application' or a 'library' chart.
 #

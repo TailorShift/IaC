@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kafka
-  namespace: {{ .Release.Namespace }}
+  name: apps-aoa
+  namespace: atos-production
 spec:
   destination:
-    namespace: {{ .Release.Namespace }}
+    namespace: atos-production
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: datacenter/charts/kafka
+    path: datacenter/apps
     repoURL: git@github.com:TailorShift/IaC.git
     targetRevision: HEAD
