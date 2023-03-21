@@ -2,7 +2,7 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: argocd-repo-iac
-  namespace: atos-development
+  namespace: {{ .Release.Namespace }}
   labels:
     argocd.argoproj.io/secret-type: repository
   annotations:

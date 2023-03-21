@@ -2,6 +2,7 @@ apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
   name: debezium-kafka-postgres-connect
+  namespace: {{ .Release.Namespace }}
   annotations:
     strimzi.io/use-connector-resources: "true" 
     argocd.argoproj.io/sync-wave: "10"

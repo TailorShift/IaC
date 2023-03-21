@@ -4,7 +4,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ArgoCD
 metadata:
   name: argocd
-  namespace: atos-development
+  namespace: {{ .Release.Namespace }}
   finalizers:
     - argoproj.io/finalizer
   labels:

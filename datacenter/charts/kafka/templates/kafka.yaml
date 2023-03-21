@@ -2,7 +2,7 @@ kind: Kafka
 apiVersion: kafka.strimzi.io/v1beta2
 metadata:
   name: kafka-datacenter
-  namespace: atos-development
+  namespace: {{ .Release.Namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:

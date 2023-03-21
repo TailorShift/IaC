@@ -2,7 +2,7 @@ apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
   name: pg-datacenter
-  namespace: atos-development
+  namespace: {{ .Release.Namespace }}
   labels:
     app: infrastructure
 spec:
