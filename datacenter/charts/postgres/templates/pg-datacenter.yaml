@@ -11,7 +11,7 @@ spec:
       databases:
         - pg-datacenter
     - name: debezium
-      database:
+      databases:
         - pg-datacenter
       options: "REPLICATION"
   backups:
