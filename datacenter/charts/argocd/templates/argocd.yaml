@@ -5,8 +5,6 @@ kind: ArgoCD
 metadata:
   name: argocd
   namespace: {{ .Release.Namespace }}
-  finalizers:
-    - argoproj.io/finalizer
   labels:
     app: infrastructure
 spec:

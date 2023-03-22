@@ -15,8 +15,8 @@ spec:
     database.history.kafka.topic: schema-changes.inventory
     database.hostname: pg-datacenter-primary.atos-development.svc.cluster.local
     database.port: 5432
-    database.user: debezium
-    database.password: dbz
+    database.user:  ${secrets:{{ .Release.Namespace }}/debezium-secret:username}
+    database.password:  ${secrets:{{ .Release.Namespace }}/debezium-secret:password}
     database.dbname: pg-datacenter
     database.server.name: pg-datacenter
-    table.include.list: public.inventory-list-of-tables  
+    table.include.list: public.customers,public.customers,public.employees,public.inventory_movements,public.public.pos_devices,public.products

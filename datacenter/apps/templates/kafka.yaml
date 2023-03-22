@@ -12,3 +12,9 @@ spec:
     path: datacenter/charts/kafka
     repoURL: git@github.com:TailorShift/IaC.git
     targetRevision: HEAD
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: debezium-secret
+      jsonPointers:
+        - /data/password
