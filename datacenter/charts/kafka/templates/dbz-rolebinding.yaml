@@ -4,9 +4,9 @@ metadata:
   name: connector-configuration-role-binding
   namespace: {{ .Release.Namespace }}
 subjects:
-- kind: ServiceAccount
-  name: debezium-kafka-postgres-connect-connect
-  namespace: debezium-example
+  - kind: ServiceAccount
+    name: debezium-kafka-postgres-connect-connect
+    namespace: debezium-example
 roleRef:
   kind: Role
   name: connector-configuration-role
