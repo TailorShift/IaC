@@ -2,7 +2,7 @@ apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnector
 metadata:
   labels:
-    strimzi.io/cluster: kafka-connect-datacenter
+    strimzi.io/cluster: kafka-connect
   annotations:
     argocd.argoproj.io/sync-wave: "20"
   name: debezium-kafka-postgres-connector
@@ -12,7 +12,7 @@ spec:
   tasksMax: 1  
   config:  
     database.history.kafka.bootstrap.servers: kafka-datacenter-kafka-bootstrap.atos-development.svc.cluster.local:9092
-    database.history.kafka.topic: schema-changes.inventory
+    database.history.kafka.topic: TailorShift.datacenter
     database.hostname: pg-datacenter-primary.atos-development.svc.cluster.local
     database.port: 5432
     database.user:  ${secrets:{{ .Release.Namespace }}/debezium-secret:username}

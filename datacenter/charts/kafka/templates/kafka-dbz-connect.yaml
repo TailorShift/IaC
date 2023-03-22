@@ -1,7 +1,7 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
-  name: debezium-kafka-postgres-connect
+  name: kafka-connect
   namespace: {{ .Release.Namespace }}
   annotations:
     strimzi.io/use-connector-resources: "true" 
