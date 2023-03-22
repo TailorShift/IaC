@@ -2,7 +2,9 @@ kind: Kafka
 apiVersion: kafka.strimzi.io/v1beta2
 metadata:
   name: kafka-backoffice
-  namespace: atos-shop-back-office
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   kafka:
     version: 3.3.1

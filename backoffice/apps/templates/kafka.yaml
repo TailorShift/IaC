@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka
+  namespace: {{ .Release.Namespace }}
+spec:
+  destination:
+    namespace: {{ .Release.Namespace }}
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: datacenter/charts/kafka
+    repoURL: git@github.com:TailorShift/IaC.git
+    targetRevision: HEAD

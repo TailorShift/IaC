@@ -1,0 +1,1 @@
+All custom applications to be deployed, need an `Application` kind resource here. Automatically deployed by ARGO CD App ../app-of-apps/apps-aoa.yaml 
