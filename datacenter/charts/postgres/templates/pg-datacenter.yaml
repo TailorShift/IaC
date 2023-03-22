@@ -6,6 +6,14 @@ metadata:
   labels:
     app: infrastructure
 spec:
+  users:
+    - name: pg-datacenter
+      databases:
+        - pg-datacenter
+    - name: debezium
+      database:
+        - pg-datacenter
+      options: "REPLICATION"
   backups:
     pgbackrest:
       repos:
