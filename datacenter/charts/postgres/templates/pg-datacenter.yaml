@@ -38,8 +38,6 @@ spec:
     dynamicConfiguration:
       postgresql:
         parameters:
-          # Configuring a replication slot for the Debezium pgoutput plug-in
-          # https://access.redhat.com/documentation/de-de/red_hat_integration/2022.q1/html/debezium_user_guide/debezium-connector-for-postgresql#configuring-a-replication-slot-for-the-debezium-pgoutput-plug-in
           wal_level: logical
           max_wal_senders: 1
           max_replication_slots: 1
