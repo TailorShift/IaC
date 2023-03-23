@@ -13,10 +13,10 @@ spec:
   config:  
     database.history.kafka.bootstrap.servers: kafka-datacenter-kafka-bootstrap.atos-development.svc.cluster.local:9092
     database.history.kafka.topic: TailorShift.datacenter
-    database.hostname: pg-datacenter-primary.atos-development.svc.cluster.local
-    database.port: 5432
-    database.user:  ${secrets:{{ .Release.Namespace }}/debezium-secret:username}
-    database.password:  ${secrets:{{ .Release.Namespace }}/debezium-secret:password}
-    database.dbname: pg-datacenter
+    database.hostname: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:host}
+    database.port: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:port}
+    database.user: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:user}
+    database.password: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:password}
+    database.dbname: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:dbname}
     database.server.name: pg-datacenter
     table.include.list: public.customers,public.customers,public.employees,public.inventory_movements,public.public.pos_devices,public.products
