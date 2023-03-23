@@ -1,0 +1,9 @@
+# Root CA issuer
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: tailorshift-ca-issuer
+  namespace: {{ .Release.Namespace }}
+spec:
+  ca:
+    secretName: root-secret
