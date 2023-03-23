@@ -11,7 +11,7 @@ spec:
     algorithm: ECDSA
     size: 256
   issuerRef:
-    name: selfsigned-issuer
+    name: self-signed-issuer
     kind: Issuer
     group: cert-manager.io
   # This will create a keystores.jks and a truststore.jks containing the root ca information
