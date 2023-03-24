@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: pos_manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+  selector:
+    app: pos_manager
