@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: container
-          image: 'quay.io/tailorshift/pos_manager:1.0.0-SNAPSHOT'
+          image: 'quay.io/tailorshift/pos-manager:1.0.0-SNAPSHOT'
           ports:
             - containerPort: 8081
               protocol: TCP
