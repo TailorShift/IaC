@@ -20,3 +20,5 @@ spec:
     database.dbname: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:dbname}
     database.server.name: pg-datacenter
     table.include.list: public.customers,public.customers,public.employees,public.inventory_movements,public.public.pos_devices,public.products
+    publication.autocreate.mode: filtered
+    plugin.name: pgoutput

@@ -38,8 +38,11 @@ spec:
     dynamicConfiguration:
       postgresql:
         parameters:
-          wal_level: logical
-          max_wal_senders: 1
           max_replication_slots: 1
+          max_wal_senders: 1
+          wal_level: logical
+        pg_hba:
+          - local replication debezium trust
+          - host all all 10.0.0.0/8 trust
   port: 5432
   postgresVersion: 13
