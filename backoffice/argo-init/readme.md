@@ -3,14 +3,13 @@ Before argocd can manage and deploy applications, an agrocd custom resource need
 
 * Choose your environment
     ```
-    NS=atos-development
-    NS=atos-production
+    NS=atos-shop-back-office
     ```
 
 * Create the argo cd instance and git repository reference
     ```
-    oc -n $NS apply -f ../charts/argocd/argocd.yaml
-    oc -n $NS apply -f ../charts/argocd/argocd-repo-iac.yaml
+    oc -n $NS apply -f ../charts/argocd/templates/argocd.yaml
+    oc -n $NS apply -f ../charts/argocd/templates/argocd-repo-iac.yaml
     ```
 
 * Edit the secret and put in the ssh private key for your github/gitlab
@@ -20,11 +19,9 @@ Before argocd can manage and deploy applications, an agrocd custom resource need
 
 * Create the app of apps, dploying other apps
     ```
-    # for development
-    oc -n $NS apply -f ../app-of-apps/apps-aoa-dev.yaml
-
-    # or for production
-    oc -n $NS apply -f ../app-of-apps/apps-aoa-prod.yaml
+    oc -n $NS apply -f ../app-of-apps/apps-aoa-shop.yaml
     ```
+
+    
 
 * In Argocd manually sync the app "apps-aoa"

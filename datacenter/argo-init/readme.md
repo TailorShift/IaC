@@ -9,8 +9,8 @@ Before argocd can manage and deploy applications, an agrocd custom resource need
 
 * Create the argo cd instance and git repository reference
     ```
-    oc -n $NS apply -f ../charts/argocd/argocd.yaml
-    oc -n $NS apply -f ../charts/argocd/argocd-repo-iac.yaml
+    oc -n $NS apply -f ../charts/argocd/templates/argocd.yaml
+    oc -n $NS apply -f ../charts/argocd/templates/argocd-repo-iac.yaml
     ```
 
 * Edit the secret and put in the ssh private key for your github/gitlab
