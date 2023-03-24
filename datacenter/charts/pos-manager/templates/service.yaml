@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: pos_manager
+  name: pos-manager
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -9,4 +9,4 @@ spec:
       port: 80
       targetPort: 8081
   selector:
-    app: pos_manager
+    app: pos-manager

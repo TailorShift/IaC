@@ -1,12 +1,12 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: pos_manager
+  name: pos-manager
   namespace: {{ .Release.Namespace }}
 spec:
   to:
     kind: Service
-    name: pos_manager
+    name: pos-manager
     weight: 100
   port:
     targetPort: 8081

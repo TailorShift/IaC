@@ -1,19 +1,19 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: pos_manager
+  name: pos-manager
   namespace: {{ .Release.Namespace }}
   labels:
-    app: pos_manager
+    app: pos-manager
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: pos_manager
+      app: pos-manager
   template:
     metadata:
       labels:
-        app: pos_manager
+        app: pos-manager
     spec:
       containers:
         - name: container
