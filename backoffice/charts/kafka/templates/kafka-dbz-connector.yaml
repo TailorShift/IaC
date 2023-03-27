@@ -1,0 +1,24 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  labels:
+    strimzi.io/cluster: kafka-connect
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+  name: debezium-kafka-postgres-connector
+  namespace: {{ .Release.Namespace }}
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector 
+  tasksMax: 1  
+  config:  
+    database.history.kafka.bootstrap.servers: kafka-backoffice-kafka-bootstrap.atos-shop-back-office.svc.cluster.local:9092
+    database.history.kafka.topic: TailorShift.backoffice
+    database.hostname: ${secrets:{{ .Release.Namespace }}/pg-backoffice-pguser-debezium:host}
+    database.port: ${secrets:{{ .Release.Namespace }}/pg-backoffice-pguser-debezium:port}
+    database.user: ${secrets:{{ .Release.Namespace }}/pg-backoffice-pguser-debezium:user}
+    database.password: ${secrets:{{ .Release.Namespace }}/pg-backoffice-pguser-debezium:password}
+    database.dbname: ${secrets:{{ .Release.Namespace }}/pg-backoffice-pguser-debezium:dbname}
+    database.server.name: pg-backoffice
+    table.include.list: public.debezium_receipt_export
+    publication.autocreate.mode: filtered
+    plugin.name: pgoutput
