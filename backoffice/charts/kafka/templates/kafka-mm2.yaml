@@ -1,0 +1,42 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaMirrorMaker2
+metadata:
+  name: mirror-cluster-backend
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusters:
+    - alias: kafka-datacenter
+      authentication:
+        type: tls
+      bootstrapServers: >-
+        kafka-datacenter-kafka-bootstrap-atos-development.apps.wa6eqszp.uksouth.aroapp.io:443
+      tls:
+        trustedCertificates:
+          - certificate: ca.crt
+            secretName: kafka-datacenter-ca
+    - alias: kafka-backoffice
+      bootstrapServers: >-
+        kafka-backoffice-kafka-bootstrap.atos-shop-back-office.svc.cluster.local:9092
+      config:
+        config.storage.replication.factor: -1
+        offset.storage.replication.factor: -1
+        status.storage.replication.factor: -1
+  connectCluster: kafka-backoffice
+  mirrors:
+    - checkpointConnector:
+        config:
+          checkpoints.topic.replication.factor: 1
+      groupsPattern: .*
+      heartbeatConnector:
+        config:
+          heartbeats.topic.replication.factor: 1
+      sourceCluster: kafka-backoffice
+      sourceConnector:
+        config:
+          offset-syncs.topic.replication.factor: 1
+          replication.factor: 1
+          sync.topic.acls.enabled: 'false'
+      targetCluster: kafka-datacenter
+      topicsPattern: pg-datacenter\.public\..*
+  replicas: 1
+  version: 3.3.1
