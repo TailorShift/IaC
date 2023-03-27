@@ -6,6 +6,14 @@ metadata:
   labels:
     app: infrastructure
 spec:
+  users:
+    - name: pg-backoffice
+      databases:
+        - pg-backoffice
+    - name: debezium
+      databases:
+        - pg-backoffice
+      options: "REPLICATION"
   backups:
     pgbackrest:
       repos:
@@ -26,5 +34,13 @@ spec:
             storage: 1Gi
       name: ''
       replicas: 1
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+          - local replication debezium trust
+          - host all all 10.0.0.0/8 trust
+          - host all all 127.0.0.1/32 trust
+          - host all all ::1/128 trust
   port: 5432
   postgresVersion: 13
