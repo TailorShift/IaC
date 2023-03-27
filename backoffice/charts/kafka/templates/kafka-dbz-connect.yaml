@@ -7,6 +7,13 @@ metadata:
     strimzi.io/use-connector-resources: "true" 
     argocd.argoproj.io/sync-wave: "10"
 spec:
+  resources:
+    requests:
+      memory: 1100Mi
+      cpu: 200m
+    limits:
+      cpu: 500m
+      memory: 1500Mi
   version: "3.3.1"
   replicas: 1
   bootstrapServers: kafka-backoffice-kafka-bootstrap:9092
