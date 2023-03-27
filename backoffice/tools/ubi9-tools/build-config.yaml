@@ -1,0 +1,28 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: ubi9-tools
+  labels:
+    app: ubi9-tools
+spec:
+  source:
+    type: git
+    dockerfile: |
+      FROM registry.redhat.io/ubi9/ubi
+      ENV LC_ALL C.UTF-8
+      RUN yum -y --nodocs --disableplugin=subscription-manager install wget java-17-openjdk && \
+      yum -y --disableplugin=subscription-manager clean all
+      ADD https://archive.apache.org/dist/kafka/3.3.1/kafka_2.13-3.3.1.tgz /tmp/kafka.tgz
+      RUN mkdir /tools && \
+      mkdir -p /tools/kafka
+      WORKDIR /tools
+      RUN tar -C /tools/kafka/ -xf /tmp/kafka.tgz
+      RUN chown -R 1001:0 /tools
+      USER 1001
+      ENV PATH=$PATH:/tools/kafka/kafka_2.13-3.3.1/bin
+  strategy:
+    type: Docker                      
+  output:
+    to:
+      kind: ImageStreamTag
+      name: ubi9-tools:latest
