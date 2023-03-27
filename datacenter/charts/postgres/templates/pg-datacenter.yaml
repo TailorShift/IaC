@@ -13,7 +13,7 @@ spec:
     - name: debezium
       databases:
         - pg-datacenter
-      options: "REPLICATION"
+      options: "REPLICATION SUPERUSER"
   backups:
     pgbackrest:
       repos:
