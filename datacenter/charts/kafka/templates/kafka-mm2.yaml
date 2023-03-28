@@ -1,21 +1,21 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaMirrorMaker2
 metadata:
-  name: mm2-pulling-backend
+  name: mm2-pulling-datacenter
   namespace: {{ .Release.Namespace }}
 spec:
   clusters:
-    - alias: kafka-datacenter
+    - alias: kafka-backoffice
       bootstrapServers: >-
-        kafka-datacenter-kafka-bootstrap-atos-development.apps.wa6eqszp.uksouth.aroapp.io:443
+        kafka-backoffice-kafka-bootstrap-atos-shop-back-office.apps.hzkv4yuz.uksouth.aroapp.io:443
       tls:
         trustedCertificates:
           - certificate: ca.crt
-            secretName: kafka-datacenter-ca
-    - alias: kafka-backoffice
+            secretName: kafka-backoffice-ca
+    - alias: kafka-datacenter
       bootstrapServers: >-
-        kafka-backoffice-kafka-bootstrap.atos-shop-back-office.svc.cluster.local:9092
-  connectCluster: kafka-backoffice
+        kafka-datacenter-kafka-bootstrap.atos-development.svc.cluster.local:9092
+  connectCluster: kafka-datacenter
   mirrors:
     - checkpointConnector:
         config:
@@ -23,12 +23,12 @@ spec:
           refresh.groups.interval.seconds: 60
           sync.group.offsets.enabled: true
           sync.group.offsets.interval.seconds: 60
-      sourceCluster: kafka-datacenter
+      sourceCluster: kafka-backoffice
       sourceConnector:
         config:
           refresh.topics.interval.seconds: 60
           sync.topic.acls.enabled: true
-      targetCluster: kafka-backoffice
-      topicsPattern: pg-datacenter.*
+      targetCluster: kafka-datacenter
+      topicsPattern: pg-backoffice.*
   replicas: 1
   version: 3.3.1
