@@ -1,0 +1,47 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: fdo-rendezvous-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: fdo-rendezvous-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fdo-rendezvous-server
+  template:
+    metadata:
+      labels:
+        app: fdo-rendezvous-server
+    spec:
+      containers:
+        - name: container
+          image: quay.io/fido-fdo/rendezvous-server:main
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/fdo/rendezvous-server.conf.d/
+            - name: manufacturing-cert
+              mountPath: /etc/fdo/keys/manufacturer_cert.pem
+              subPath: tls.key
+            - name: registered
+              mountPath: /etc/fdo/stores/rendezvous_sessions
+            - name: sessions
+              mountPath: /etc/fdo/stores/rendezvous_sessions
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+        - name: config
+          configMap:
+            name: fdo-rendezvous-server
+        - name: manufacturing-cert
+          secret:
+            secret-name: fdo-manufacturing-cert
+        - name: registered
+          emptyDir: {}
+        - name: sessions
+          emptyDir: {}

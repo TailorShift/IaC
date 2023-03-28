@@ -1,0 +1,47 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: fdo-owner-onboarding-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: fdo-owner-onboarding-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fdo-owner-onboarding-server
+  template:
+    metadata:
+      labels:
+        app: fdo-owner-onboarding-server
+    spec:
+      containers:
+        - name: container
+          image: quay.io/fido-fdo/owner-onboarding-server:main
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/fdo/owner-onboarding-server.conf.d/
+            - name: manufacturing-cert
+              mountPath: /etc/fdo/keys/manufacturer_cert.pem
+              subPath: tls.key
+            - name: sessions
+              mountPath: /etc/fdo/stores/owner_onboarding_sessions
+            - name: ownership_vouchers
+              mountPath: /etc/fdo/stores/rendezvous_registered
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+        - name: config
+          configMap:
+            name: fdo-owner-onboarding-server
+        - name: manufacturing-cert
+          secret:
+            secret-name: fdo-manufacturing-cert
+        - name: sessions
+          emptyDir: {}
+        - name: ownership_vouchers
+          emptyDir: {}
