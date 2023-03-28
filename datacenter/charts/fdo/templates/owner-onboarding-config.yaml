@@ -13,7 +13,7 @@ data:
       Directory:
         path: /etc/fdo/stores/owner_vouchers
     trusted_device_keys_path: /etc/fdo/keys/device_ca_cert.pem
-    owner_private_key_path: /etc/fdo/keys/owner_key.der
+    owner_private_key_path: /etc/fdo/keys/owner_key.key
     owner_public_key_path: /etc/fdo/keys/owner_cert.pem
     owner_addresses:
       - transport: HTTP

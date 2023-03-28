@@ -24,9 +24,15 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/fdo/owner-onboarding-server.conf.d/
-            - name: manufacturing-cert
-              mountPath: /etc/fdo/keys/manufacturer_cert.pem
+            - name: owner-cert
+              mountPath: /etc/fdo/keys/owner_cert.pem
+              subPath: tls.crt
+            - name: owner-cert
+              mountPath: /etc/fdo/keys/owner_key.key
               subPath: tls.key
+            - name: device-ca-cert
+              mountPath: /etc/fdo/keys/device_ca_cert.pem
+              subPath: tls.crt
             - name: sessions
               mountPath: /etc/fdo/stores/owner_onboarding_sessions
             - name: ownership-vouchers
@@ -38,9 +44,12 @@ spec:
         - name: config
           configMap:
             name: fdo-owner-onboarding-server
-        - name: manufacturing-cert
+        - name: owner-cert
           secret:
-            secretName: fdo-manufacturing-cert
+            secretName: fdo-owner-cert
+        - name: device-ca-cert
+          secret:
+            secretName: fdo-device-ca
         - name: sessions
           emptyDir: {}
         - name: ownership-vouchers

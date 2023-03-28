@@ -1,0 +1,76 @@
+# The manufacturing cert is usually in manufacturers hands.
+# But we need one for our Hackfest, so why not use CertManager
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fdo-manufacturing-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+    - fdo-manufacturing.tailorshift.com
+  issuerRef:
+    kind: Issuer
+    name: tailorshift-ca-issuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  secretName: fdo-manufacturing-cert
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fdo-owner
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+    - fdo-owner.tailorshift.com
+  issuerRef:
+    kind: Issuer
+    name: tailorshift-ca-issuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  secretName: fdo-owner-cert
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fdo-device-ca
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+    - fdo-device-ca.tailorshift.com
+  issuerRef:
+    kind: Issuer
+    name: tailorshift-ca-issuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  secretName: fdo-device-ca
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fdo-diun
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+    - fdo-device-ca.tailorshift.com
+  issuerRef:
+    kind: Issuer
+    name: tailorshift-ca-issuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  secretName: fdo-diun
+
