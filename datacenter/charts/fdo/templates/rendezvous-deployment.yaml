@@ -28,7 +28,7 @@ spec:
               mountPath: /etc/fdo/keys/manufacturer_cert.pem
               subPath: tls.key
             - name: registered
-              mountPath: /etc/fdo/stores/rendezvous_sessions
+              mountPath: /etc/fdo/stores/rendezvous_registered
             - name: sessions
               mountPath: /etc/fdo/stores/rendezvous_sessions
       restartPolicy: Always

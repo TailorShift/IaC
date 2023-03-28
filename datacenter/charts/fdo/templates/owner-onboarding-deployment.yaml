@@ -29,7 +29,7 @@ spec:
               subPath: tls.key
             - name: sessions
               mountPath: /etc/fdo/stores/owner_onboarding_sessions
-            - name: ownership_vouchers
+            - name: ownership-vouchers
               mountPath: /etc/fdo/stores/rendezvous_registered
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
@@ -43,5 +43,5 @@ spec:
             secretName: fdo-manufacturing-cert
         - name: sessions
           emptyDir: {}
-        - name: ownership_vouchers
+        - name: ownership-vouchers
           emptyDir: {}
