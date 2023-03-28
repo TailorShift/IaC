@@ -15,6 +15,29 @@ spec:
       labels:
         app: fdo-owner-onboarding-server
     spec:
+      initContainers:
+        # CertManager can't create private keys in .der format yet
+        # (it's an experimental feature not activated)
+        # Thus we convert with openssl
+        - name: cert-converter
+          image: registry.redhat.io/ubi9/ubi
+          imagePullPolicy: Always
+          command: ['sh', '-c', '/script/convert-cert.sh']
+          volumeMounts:
+            - name: convert-script
+              mountPath: /script/convert-cert.sh
+              subPath: convert-cert.sh
+            - name: certs
+              mountPath: /etc/fdo/keys
+            - name: owner-cert
+              mountPath: /keys/owner_cert.pem
+              subPath: tls.crt
+            - name: owner-cert
+              mountPath: /keys/owner_cert.key
+              subPath: tls.key
+            - name: device-ca-cert
+              mountPath: /keys/device_ca_cert.pem
+              subPath: tls.crt
       containers:
         - name: container
           image: quay.io/fido-fdo/owner-onboarding-server:main
@@ -23,20 +46,14 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: config
-              mountPath: /etc/fdo/owner-onboarding-server.conf.d/
-            - name: owner-cert
-              mountPath: /etc/fdo/keys/owner_cert.pem
-              subPath: tls.crt
-            - name: owner-cert
-              mountPath: /etc/fdo/keys/owner_key.key
-              subPath: tls.key
-            - name: device-ca-cert
-              mountPath: /etc/fdo/keys/device_ca_cert.pem
-              subPath: tls.crt
+              mountPath: /etc/fdo/owner-onboarding-server.conf.d/config.yml
+              subPath: config.yml
+            - name: certs
+              mountPath: /etc/fdo/keys/
             - name: sessions
               mountPath: /etc/fdo/stores/owner_onboarding_sessions
             - name: ownership-vouchers
-              mountPath: /etc/fdo/stores/rendezvous_registered
+              mountPath: /etc/fdo/stores/owner_vouchers
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
@@ -44,6 +61,10 @@ spec:
         - name: config
           configMap:
             name: fdo-owner-onboarding-server
+        - name: convert-script
+          configMap:
+            name: fdo-owner-onboarding-server
+            defaultMode: 077
         - name: owner-cert
           secret:
             secretName: fdo-owner-cert
@@ -53,4 +74,6 @@ spec:
         - name: sessions
           emptyDir: {}
         - name: ownership-vouchers
+          emptyDir: {}
+        - name: certs
           emptyDir: {}

@@ -4,6 +4,11 @@ metadata:
   name: fdo-owner-onboarding-server
   namespace: {{ .Release.Namespace }}
 data:
+  convert-cert.sh: |-
+    ls -lah /keys
+    cp /keys/*.pem /etc/fdo/keys/
+    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/owner_cert.key -out /etc/fdo/keys/owner_cert.der -nocrypt
+    ls -lah /etc/fdo/keys
   config.yml: |-
     ---
     session_store_driver:
@@ -13,7 +18,7 @@ data:
       Directory:
         path: /etc/fdo/stores/owner_vouchers
     trusted_device_keys_path: /etc/fdo/keys/device_ca_cert.pem
-    owner_private_key_path: /etc/fdo/keys/owner_key.key
+    owner_private_key_path: /etc/fdo/keys/owner_cert.der
     owner_public_key_path: /etc/fdo/keys/owner_cert.pem
     owner_addresses:
       - transport: HTTP
