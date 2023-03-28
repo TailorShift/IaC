@@ -40,7 +40,7 @@ spec:
             name: fdo-owner-onboarding-server
         - name: manufacturing-cert
           secret:
-            secret-name: fdo-manufacturing-cert
+            secretName: fdo-manufacturing-cert
         - name: sessions
           emptyDir: {}
         - name: ownership_vouchers
