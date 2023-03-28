@@ -4,7 +4,7 @@ metadata:
   name: fdo-owner-onboarding-server
   namespace: {{ .Release.Namespace }}
 data:
-  config.yaml: |-
+  config.yml: |-
     ---
     session_store_driver:
       Directory:
