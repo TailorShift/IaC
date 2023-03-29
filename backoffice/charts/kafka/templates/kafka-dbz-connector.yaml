@@ -20,6 +20,7 @@ spec:
     database.dbname: ${secrets:{{ .Release.Namespace }}/pg-backoffice-pguser-debezium:dbname}
     database.server.name: pg-backoffice
     table.include.list: public.debezium_receipt_export
+    delete.topic.enabled: true
     decimal.handling.mode: string
     publication.autocreate.mode: filtered
     plugin.name: pgoutput
