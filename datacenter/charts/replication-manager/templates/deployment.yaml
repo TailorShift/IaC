@@ -27,6 +27,9 @@ spec:
                 secretKeyRef:
                   name: pg-datacenter-pguser-pg-datacenter
                   key: jdbc-uri
+          envFrom:
+            - configMapRef:
+                name: replication-manager
           imagePullPolicy: Always
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
