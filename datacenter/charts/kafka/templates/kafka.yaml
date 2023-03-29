@@ -30,6 +30,7 @@ spec:
       default.replication.factor: 3
       min.insync.replicas: 2
       inter.broker.protocol.version: '3.3'
+      delete.topic.enabled: true
     storage:
       type: ephemeral
   zookeeper:
