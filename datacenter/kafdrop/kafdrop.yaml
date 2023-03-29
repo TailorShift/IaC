@@ -2,7 +2,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: kafdrop
-  namespace: atos-shop-back-office
+  namespace: atos-development
   labels:
     app: kafdrop
 spec:
@@ -29,7 +29,7 @@ spec:
             - name: JVM_OPTS
               value: '-Xms512M -Xmx1024M'
             - name: KAFKA_BROKERCONNECT
-              value: 'kafka-backoffice-kafka-bootstrap.atos-shop-back-office.svc:9092'
+              value: 'kafka-datacenter-kafka-bootstrap.atos-development.svc:9092'
             - name: SERVER_SERVLET_CONTEXTPATH
               value: '/'
           resources:
@@ -54,7 +54,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: kafdrop
-  namespace: atos-shop-back-office
+  namespace: atos-development
   labels:
     app: kafdrop
 spec:
