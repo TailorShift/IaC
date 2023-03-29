@@ -6,7 +6,7 @@ metadata:
   labels:
     app: replication-manager
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: replication-manager
