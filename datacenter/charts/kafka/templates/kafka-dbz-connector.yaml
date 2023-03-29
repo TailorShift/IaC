@@ -19,7 +19,7 @@ spec:
     database.password: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:password}
     database.dbname: ${secrets:{{ .Release.Namespace }}/pg-datacenter-pguser-debezium:dbname}
     database.server.name: pg-datacenter
-    table.include.list: public.customers,public.employees,public.inventory_movements,public.pos_devices,public.products
+    table.include.list: public.shops,public.customers,public.employees,public.inventory_movements,public.pos_devices,public.products
     decimal.handling.mode: string
     publication.autocreate.mode: filtered
     plugin.name: pgoutput
