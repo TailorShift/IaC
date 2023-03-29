@@ -33,12 +33,10 @@ spec:
       delete.topic.enabled: true
     storage:
       type: ephemeral
-      deleteClaim: true
   zookeeper:
     replicas: 3
     storage:
       type: ephemeral
-      deleteClaim: true
   entityOperator:
     topicOperator: {}
     userOperator: {}
