@@ -145,7 +145,7 @@ As part of this hackfest we used the following technologies:
 * Grafana for visualizing sales predictions
 * Cert Manager for setting up a PKI infrastructure and dynamic certificate generation
 * Quarkus (with Java) as the only framework for backend application development
-* Hibernate and Panache for accessing the databse in Quarkus
+* Hibernate and Panache for accessing the database in Quarkus
 * Patternfly Seed (with Typescript) for frontend application development
 * GitHub for version control
 * Flyway for database version control
