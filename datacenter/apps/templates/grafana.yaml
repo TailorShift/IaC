@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  destination:
+    namespace: {{ .Release.Namespace }}
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: datacenter/charts/grafana
+    repoURL: git@github.com:TailorShift/IaC.git
+    targetRevision: HEAD
+    helm:
+      valueFiles: 
+        - ../values-{{ .Release.Namespace }}.yaml
