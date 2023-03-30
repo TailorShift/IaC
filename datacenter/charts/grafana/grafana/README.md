@@ -1,651 +1,681 @@
-# Grafana Helm Chart
+<!--- app-name: Grafana -->
 
-* Installs the web dashboarding system [Grafana](http://grafana.org/)
+# Grafana packaged by Bitnami
 
-## Get Repo Info
+Grafana is an open source metric analytics and visualization suite for visualizing time series data that supports various types of data sources.
+
+[Overview of Grafana](https://grafana.com/)
+
+Trademarks: This software listing is packaged by Bitnami. The respective trademarks mentioned in the offering are owned by the respective companies, and use of them does not imply any affiliation or endorsement.
+
+## TL;DR
 
 ```console
-helm repo add grafana https://grafana.github.io/helm-charts
-helm repo update
+helm repo add my-repo https://charts.bitnami.com/bitnami
+helm install my-release my-repo/grafana
 ```
 
-_See [helm repo](https://helm.sh/docs/helm/helm_repo/) for command documentation._
+## Introduction
+
+This chart bootstraps a [grafana](https://github.com/bitnami/containers/tree/main/bitnami/grafana) deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+Bitnami charts can be used with [Kubeapps](https://kubeapps.dev/) for deployment and management of Helm Charts in clusters.
+
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+- PV provisioner support in the underlying infrastructure
+- ReadWriteMany volumes for deployment scaling
 
 ## Installing the Chart
 
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release grafana/grafana
+helm repo add my-repo https://charts.bitnami.com/bitnami
+helm install my-release my-repo/grafana
 ```
+
+These commands deploy grafana on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
+
+> **Tip**: List all releases using `helm list`
 
 ## Uninstalling the Chart
 
-To uninstall/delete the my-release deployment:
+To uninstall/delete the `my-release` deployment:
 
 ```console
 helm delete my-release
 ```
 
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+The command removes all the Kubernetes components associated with the chart and deletes the release. Use the option `--purge` to delete all persistent volumes too.
 
-## Upgrading an existing Release to a new major version
+## Differences between the Bitnami Grafana chart and the Bitnami Grafana Operator chart
 
-A major chart version change (like v1.2.3 -> v2.0.0) indicates that there is an
-incompatible breaking change needing manual actions.
+In the Bitnami catalog we offer both the bitnami/grafana and bitnami/grafana-operator charts. Each solution covers different needs and use cases.
 
-### To 4.0.0 (And 3.12.1)
+The *bitnami/grafana* chart deploys a single Grafana installation (with grafana-image-renderer) using a Kubernetes Deployment object (together with Services, PVCs, ConfigMaps, etc.). The figure below shows the deployed objects in the cluster after executing *helm install*:
 
-This version requires Helm >= 2.12.0.
+```text
+                    +--------------+             +-----+
+                    |              |             |     |
+ Service & Ingress  |    Grafana   +<------------+ PVC |
+<-------------------+              |             |     |
+                    |  Deployment  |             +-----+
+                    |              |
+                    +-----------+--+
+                                ^                +------------+
+                                |                |            |
+                                +----------------+ Configmaps |
+                                                 |   Secrets  |
+                                                 |            |
+                                                 +------------+
 
-### To 5.0.0
-
-You have to add --force to your helm upgrade command as the labels of the chart have changed.
-
-### To 6.0.0
-
-This version requires Helm >= 3.1.0.
-
-## Configuration
-
-| Parameter                                 | Description                                   | Default                                                 |
-|-------------------------------------------|-----------------------------------------------|---------------------------------------------------------|
-| `replicas`                                | Number of nodes                               | `1`                                                     |
-| `podDisruptionBudget.minAvailable`        | Pod disruption minimum available              | `nil`                                                   |
-| `podDisruptionBudget.maxUnavailable`      | Pod disruption maximum unavailable            | `nil`                                                   |
-| `deploymentStrategy`                      | Deployment strategy                           | `{ "type": "RollingUpdate" }`                           |
-| `livenessProbe`                           | Liveness Probe settings                       | `{ "httpGet": { "path": "/api/health", "port": 3000 } "initialDelaySeconds": 60, "timeoutSeconds": 30, "failureThreshold": 10 }` |
-| `readinessProbe`                          | Readiness Probe settings                      | `{ "httpGet": { "path": "/api/health", "port": 3000 } }`|
-| `securityContext`                         | Deployment securityContext                    | `{"runAsUser": 472, "runAsGroup": 472, "fsGroup": 472}`  |
-| `priorityClassName`                       | Name of Priority Class to assign pods         | `nil`                                                   |
-| `image.repository`                        | Image repository                              | `grafana/grafana`                                       |
-| `image.tag`                               | Overrides the Grafana image tag whose default is the chart appVersion (`Must be >= 5.0.0`) | ``                                                      |
-| `image.sha`                               | Image sha (optional)                          | ``                                                      |
-| `image.pullPolicy`                        | Image pull policy                             | `IfNotPresent`                                          |
-| `image.pullSecrets`                       | Image pull secrets (can be templated)         | `[]`                                                    |
-| `service.enabled`                         | Enable grafana service                        | `true`                                                  |
-| `service.type`                            | Kubernetes service type                       | `ClusterIP`                                             |
-| `service.port`                            | Kubernetes port where service is exposed      | `80`                                                    |
-| `service.portName`                        | Name of the port on the service               | `service`                                               |
-| `service.appProtocol`                     | Adds the appProtocol field to the service     | ``                                                      |
-| `service.targetPort`                      | Internal service is port                      | `3000`                                                  |
-| `service.nodePort`                        | Kubernetes service nodePort                   | `nil`                                                   |
-| `service.annotations`                     | Service annotations (can be templated)        | `{}`                                                    |
-| `service.labels`                          | Custom labels                                 | `{}`                                                    |
-| `service.clusterIP`                       | internal cluster service IP                   | `nil`                                                   |
-| `service.loadBalancerIP`                  | IP address to assign to load balancer (if supported) | `nil`                                            |
-| `service.loadBalancerSourceRanges`        | list of IP CIDRs allowed access to lb (if supported) | `[]`                                             |
-| `service.externalIPs`                     | service external IP addresses                 | `[]`                                                    |
-| `headlessService`                         | Create a headless service                     | `false`                                                 |
-| `extraExposePorts`                        | Additional service ports for sidecar containers| `[]`                                                   |
-| `hostAliases`                             | adds rules to the pod's /etc/hosts            | `[]`                                                    |
-| `ingress.enabled`                         | Enables Ingress                               | `false`                                                 |
-| `ingress.annotations`                     | Ingress annotations (values are templated)    | `{}`                                                    |
-| `ingress.labels`                          | Custom labels                                 | `{}`                                                    |
-| `ingress.path`                            | Ingress accepted path                         | `/`                                                     |
-| `ingress.pathType`                        | Ingress type of path                          | `Prefix`                                                |
-| `ingress.hosts`                           | Ingress accepted hostnames                    | `["chart-example.local"]`                                                    |
-| `ingress.extraPaths`                      | Ingress extra paths to prepend to every host configuration. Useful when configuring [custom actions with AWS ALB Ingress Controller](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/ingress/annotation/#actions). Requires `ingress.hosts` to have one or more host entries. | `[]`                                                    |
-| `ingress.tls`                             | Ingress TLS configuration                     | `[]`                                                    |
-| `resources`                               | CPU/Memory resource requests/limits           | `{}`                                                    |
-| `nodeSelector`                            | Node labels for pod assignment                | `{}`                                                    |
-| `tolerations`                             | Toleration labels for pod assignment          | `[]`                                                    |
-| `affinity`                                | Affinity settings for pod assignment          | `{}`                                                    |
-| `extraInitContainers`                     | Init containers to add to the grafana pod     | `{}`                                                    |
-| `extraContainers`                         | Sidecar containers to add to the grafana pod  | `""`                                                    |
-| `extraContainerVolumes`                   | Volumes that can be mounted in sidecar containers | `[]`                                                |
-| `extraLabels`                             | Custom labels for all manifests               | `{}`                                                    |
-| `schedulerName`                           | Name of the k8s scheduler (other than default) | `nil`                                                  |
-| `persistence.enabled`                     | Use persistent volume to store data           | `false`                                                 |
-| `persistence.type`                        | Type of persistence (`pvc` or `statefulset`)  | `pvc`                                                   |
-| `persistence.size`                        | Size of persistent volume claim               | `10Gi`                                                  |
-| `persistence.existingClaim`               | Use an existing PVC to persist data (can be templated) | `nil`                                          |
-| `persistence.storageClassName`            | Type of persistent volume claim               | `nil`                                                   |
-| `persistence.accessModes`                 | Persistence access modes                      | `[ReadWriteOnce]`                                       |
-| `persistence.annotations`                 | PersistentVolumeClaim annotations             | `{}`                                                    |
-| `persistence.finalizers`                  | PersistentVolumeClaim finalizers              | `[ "kubernetes.io/pvc-protection" ]`                    |
-| `persistence.extraPvcLabels`              | Extra labels to apply to a PVC.               | `{}`                                                    |
-| `persistence.subPath`                     | Mount a sub dir of the persistent volume (can be templated) | `nil`                                     |
-| `persistence.inMemory.enabled`            | If persistence is not enabled, whether to mount the local storage in-memory to improve performance | `false`                                                   |
-| `persistence.inMemory.sizeLimit`          | SizeLimit for the in-memory local storage     | `nil`                                                   |
-| `initChownData.enabled`                   | If false, don't reset data ownership at startup | true                                                  |
-| `initChownData.image.repository`          | init-chown-data container image repository    | `busybox`                                               |
-| `initChownData.image.tag`                 | init-chown-data container image tag           | `1.31.1`                                                |
-| `initChownData.image.sha`                 | init-chown-data container image sha (optional)| `""`                                                    |
-| `initChownData.image.pullPolicy`          | init-chown-data container image pull policy   | `IfNotPresent`                                          |
-| `initChownData.resources`                 | init-chown-data pod resource requests & limits | `{}`                                                   |
-| `schedulerName`                           | Alternate scheduler name                      | `nil`                                                   |
-| `env`                                     | Extra environment variables passed to pods    | `{}`                                                    |
-| `envValueFrom`                            | Environment variables from alternate sources. See the API docs on [EnvVarSource](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#envvarsource-v1-core) for format details. Can be templated | `{}` |
-| `envFromSecret`                           | Name of a Kubernetes secret (must be manually created in the same namespace) containing values to be added to the environment. Can be templated | `""` |
-| `envFromSecrets`                          | List of Kubernetes secrets (must be manually created in the same namespace) containing values to be added to the environment. Can be templated | `[]` |
-| `envFromConfigMaps`                       | List of Kubernetes ConfigMaps (must be manually created in the same namespace) containing values to be added to the environment. Can be templated | `[]` |
-| `envRenderSecret`                         | Sensible environment variables passed to pods and stored as secret | `{}`                               |
-| `enableServiceLinks`                      | Inject Kubernetes services as environment variables. | `true`                                           |
-| `extraSecretMounts`                       | Additional grafana server secret mounts       | `[]`                                                    |
-| `extraVolumeMounts`                       | Additional grafana server volume mounts       | `[]`                                                    |
-| `createConfigmap`                         | Enable creating the grafana configmap         | `true`                                                  |
-| `extraConfigmapMounts`                    | Additional grafana server configMap volume mounts (values are templated) | `[]`                         |
-| `extraEmptyDirMounts`                     | Additional grafana server emptyDir volume mounts | `[]`                                                 |
-| `plugins`                                 | Plugins to be loaded along with Grafana       | `[]`                                                    |
-| `datasources`                             | Configure grafana datasources (passed through tpl) | `{}`                                               |
-| `alerting`                                | Configure grafana alerting (passed through tpl) | `{}`                                                  |
-| `notifiers`                               | Configure grafana notifiers                   | `{}`                                                    |
-| `dashboardProviders`                      | Configure grafana dashboard providers         | `{}`                                                    |
-| `dashboards`                              | Dashboards to import                          | `{}`                                                    |
-| `dashboardsConfigMaps`                    | ConfigMaps reference that contains dashboards | `{}`                                                    |
-| `grafana.ini`                             | Grafana's primary configuration               | `{}`                                                    |
-| `global.imagePullSecrets`                 | Global image pull secrets (can be templated). Allows either an array of {name: pullSecret} maps (k8s-style), or an array of strings (more common helm-style).  | `[]`                                                    |
-| `ldap.enabled`                            | Enable LDAP authentication                    | `false`                                                 |
-| `ldap.existingSecret`                     | The name of an existing secret containing the `ldap.toml` file, this must have the key `ldap-toml`. | `""` |
-| `ldap.config`                             | Grafana's LDAP configuration                  | `""`                                                    |
-| `annotations`                             | Deployment annotations                        | `{}`                                                    |
-| `labels`                                  | Deployment labels                             | `{}`                                                    |
-| `podAnnotations`                          | Pod annotations                               | `{}`                                                    |
-| `podLabels`                               | Pod labels                                    | `{}`                                                    |
-| `podPortName`                             | Name of the grafana port on the pod           | `grafana`                                               |
-| `lifecycleHooks`                          | Lifecycle hooks for podStart and preStop [Example](https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/#define-poststart-and-prestop-handlers)     | `{}`                                                    |
-| `sidecar.image.repository`                | Sidecar image repository                      | `quay.io/kiwigrid/k8s-sidecar`                          |
-| `sidecar.image.tag`                       | Sidecar image tag                             | `1.22.0`                                                |
-| `sidecar.image.sha`                       | Sidecar image sha (optional)                  | `""`                                                    |
-| `sidecar.imagePullPolicy`                 | Sidecar image pull policy                     | `IfNotPresent`                                          |
-| `sidecar.resources`                       | Sidecar resources                             | `{}`                                                    |
-| `sidecar.securityContext`                 | Sidecar securityContext                       | `{}`                                                    |
-| `sidecar.enableUniqueFilenames`           | Sets the kiwigrid/k8s-sidecar UNIQUE_FILENAMES environment variable. If set to `true` the sidecar will create unique filenames where duplicate data keys exist between ConfigMaps and/or Secrets within the same or multiple Namespaces. | `false`                           |
-| `sidecar.alerts.enabled`             | Enables the cluster wide search for alerts and adds/updates/deletes them in grafana |`false`       |
-| `sidecar.alerts.label`               | Label that config maps with alerts should have to be added | `grafana_alert`                               |
-| `sidecar.alerts.labelValue`          | Label value that config maps with alerts should have to be added | `""`                                |
-| `sidecar.alerts.searchNamespace`     | Namespaces list. If specified, the sidecar will search for alerts config-maps  inside these namespaces. Otherwise the namespace in which the sidecar is running will be used. It's also possible to specify ALL to search in all namespaces. | `nil`                               |
-| `sidecar.alerts.watchMethod`         | Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds. | `WATCH` |
-| `sidecar.alerts.resource`            | Should the sidecar looks into secrets, configmaps or both. | `both`                               |
-| `sidecar.alerts.reloadURL`           | Full url of datasource configuration reload API endpoint, to invoke after a config-map change | `"http://localhost:3000/api/admin/provisioning/alerting/reload"` |
-| `sidecar.alerts.skipReload`          | Enabling this omits defining the REQ_URL and REQ_METHOD environment variables | `false` |
-| `sidecar.alerts.initDatasources`     | Set to true to deploy the datasource sidecar as an initContainer in addition to a container. This is needed if skipReload is true, to load any alerts defined at startup time. | `false` |
-| `sidecar.dashboards.enabled`              | Enables the cluster wide search for dashboards and adds/updates/deletes them in grafana | `false`       |
-| `sidecar.dashboards.SCProvider`           | Enables creation of sidecar provider          | `true`                                                  |
-| `sidecar.dashboards.provider.name`        | Unique name of the grafana provider           | `sidecarProvider`                                       |
-| `sidecar.dashboards.provider.orgid`       | Id of the organisation, to which the dashboards should be added | `1`                                   |
-| `sidecar.dashboards.provider.folder`      | Logical folder in which grafana groups dashboards | `""`                                                |
-| `sidecar.dashboards.provider.disableDelete` | Activate to avoid the deletion of imported dashboards | `false`                                       |
-| `sidecar.dashboards.provider.allowUiUpdates` | Allow updating provisioned dashboards from the UI | `false`                                          |
-| `sidecar.dashboards.provider.type`        | Provider type                                 | `file`                                                  |
-| `sidecar.dashboards.provider.foldersFromFilesStructure`        | Allow Grafana to replicate dashboard structure from filesystem.                                 | `false`                                                  |
-| `sidecar.dashboards.watchMethod`          | Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds. | `WATCH` |
-| `sidecar.skipTlsVerify`                   | Set to true to skip tls verification for kube api calls | `nil`                                         |
-| `sidecar.dashboards.label`                | Label that config maps with dashboards should have to be added | `grafana_dashboard`                                |
-| `sidecar.dashboards.labelValue`                | Label value that config maps with dashboards should have to be added | `""`                                |
-| `sidecar.dashboards.folder`               | Folder in the pod that should hold the collected dashboards (unless `sidecar.dashboards.defaultFolderName` is set). This path will be mounted. | `/tmp/dashboards`    |
-| `sidecar.dashboards.folderAnnotation`     | The annotation the sidecar will look for in configmaps to override the destination folder for files | `nil`                                                  |
-| `sidecar.dashboards.defaultFolderName`    | The default folder name, it will create a subfolder under the `sidecar.dashboards.folder` and put dashboards in there instead | `nil`                                |
-| `sidecar.dashboards.searchNamespace`      | Namespaces list. If specified, the sidecar will search for dashboards config-maps  inside these namespaces. Otherwise the namespace in which the sidecar is running will be used. It's also possible to specify ALL to search in all namespaces. | `nil`                                |
-| `sidecar.dashboards.script`               | Absolute path to shell script to execute after a configmap got reloaded. | `nil`                                |
-| `sidecar.dashboards.reloadURL`            | Full url of dashboards configuration reload API endpoint, to invoke after a config-map change | `"http://localhost:3000/api/admin/provisioning/dashboards/reload"` |
-| `sidecar.dashboards.skipReload`           | Enabling this omits defining the REQ_URL and REQ_METHOD environment variables | `false` |
-| `sidecar.dashboards.resource`             | Should the sidecar looks into secrets, configmaps or both. | `both`                               |
-| `sidecar.dashboards.extraMounts`          | Additional dashboard sidecar volume mounts. | `[]`                               |
-| `sidecar.datasources.enabled`             | Enables the cluster wide search for datasources and adds/updates/deletes them in grafana |`false`       |
-| `sidecar.datasources.label`               | Label that config maps with datasources should have to be added | `grafana_datasource`                               |
-| `sidecar.datasources.labelValue`          | Label value that config maps with datasources should have to be added | `""`                                |
-| `sidecar.datasources.searchNamespace`     | Namespaces list. If specified, the sidecar will search for datasources config-maps  inside these namespaces. Otherwise the namespace in which the sidecar is running will be used. It's also possible to specify ALL to search in all namespaces. | `nil`                               |
-| `sidecar.datasources.watchMethod`         | Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds. | `WATCH` |
-| `sidecar.datasources.resource`            | Should the sidecar looks into secrets, configmaps or both. | `both`                               |
-| `sidecar.datasources.reloadURL`           | Full url of datasource configuration reload API endpoint, to invoke after a config-map change | `"http://localhost:3000/api/admin/provisioning/datasources/reload"` |
-| `sidecar.datasources.skipReload`          | Enabling this omits defining the REQ_URL and REQ_METHOD environment variables | `false` |
-| `sidecar.datasources.initDatasources`     | Set to true to deploy the datasource sidecar as an initContainer in addition to a container. This is needed if skipReload is true, to load any datasources defined at startup time. | `false` |
-| `sidecar.notifiers.enabled`               | Enables the cluster wide search for notifiers and adds/updates/deletes them in grafana | `false`        |
-| `sidecar.notifiers.label`                 | Label that config maps with notifiers should have to be added | `grafana_notifier`                               |
-| `sidecar.notifiers.labelValue`            | Label value that config maps with notifiers should have to be added | `""`                                |
-| `sidecar.notifiers.searchNamespace`       | Namespaces list. If specified, the sidecar will search for notifiers config-maps (or secrets) inside these namespaces. Otherwise the namespace in which the sidecar is running will be used. It's also possible to specify ALL to search in all namespaces. | `nil`                               |
-| `sidecar.notifiers.watchMethod`           | Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH requests, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds. | `WATCH` |
-| `sidecar.notifiers.resource`              | Should the sidecar looks into secrets, configmaps or both. | `both`                               |
-| `sidecar.notifiers.reloadURL`             | Full url of notifier configuration reload API endpoint, to invoke after a config-map change | `"http://localhost:3000/api/admin/provisioning/notifications/reload"` |
-| `sidecar.notifiers.skipReload`            | Enabling this omits defining the REQ_URL and REQ_METHOD environment variables | `false` |
-| `sidecar.notifiers.initNotifiers`         | Set to true to deploy the notifier sidecar as an initContainer in addition to a container. This is needed if skipReload is true, to load any notifiers defined at startup time. | `false` |
-| `smtp.existingSecret`                     | The name of an existing secret containing the SMTP credentials. | `""`                                  |
-| `smtp.userKey`                            | The key in the existing SMTP secret containing the username. | `"user"`                                 |
-| `smtp.passwordKey`                        | The key in the existing SMTP secret containing the password. | `"password"`                             |
-| `admin.existingSecret`                    | The name of an existing secret containing the admin credentials (can be templated). | `""`                                 |
-| `admin.userKey`                           | The key in the existing admin secret containing the username. | `"admin-user"`                          |
-| `admin.passwordKey`                       | The key in the existing admin secret containing the password. | `"admin-password"`                      |
-| `serviceAccount.autoMount`                | Automount the service account token in the pod| `true`                                                  |
-| `serviceAccount.annotations`              | ServiceAccount annotations                    |                                                         |
-| `serviceAccount.create`                   | Create service account                        | `true`                                                  |
-| `serviceAccount.labels`                   | ServiceAccount labels                         | `{}`                                                    |
-| `serviceAccount.name`                     | Service account name to use, when empty will be set to created account if `serviceAccount.create` is set else to `default` | `` |
-| `serviceAccount.nameTest`                 | Service account name to use for test, when empty will be set to created account if `serviceAccount.create` is set else to `default` | `nil` |
-| `rbac.create`                             | Create and use RBAC resources                 | `true`                                                  |
-| `rbac.namespaced`                         | Creates Role and Rolebinding instead of the default ClusterRole and ClusteRoleBindings for the grafana instance  | `false` |
-| `rbac.useExistingRole`                    | Set to a rolename to use existing role - skipping role creating - but still doing serviceaccount and rolebinding to the rolename set here. | `nil` |
-| `rbac.pspEnabled`                         | Create PodSecurityPolicy (with `rbac.create`, grant roles permissions as well) | `true`                 |
-| `rbac.pspUseAppArmor`                     | Enforce AppArmor in created PodSecurityPolicy (requires `rbac.pspEnabled`)  | `true`                    |
-| `rbac.extraRoleRules`                     | Additional rules to add to the Role           | []                                                      |
-| `rbac.extraClusterRoleRules`              | Additional rules to add to the ClusterRole    | []                                                      |
-| `command`                                 | Define command to be executed by grafana container at startup | `nil`                                   |
-| `args`                                    | Define additional args if command is used     | `nil`                                                   |
-| `testFramework.enabled`                   | Whether to create test-related resources      | `true`                                                  |
-| `testFramework.image`                     | `test-framework` image repository.            | `bats/bats`                                             |
-| `testFramework.tag`                       | `test-framework` image tag.                   | `v1.4.1`                                                |
-| `testFramework.imagePullPolicy`           | `test-framework` image pull policy.           | `IfNotPresent`                                          |
-| `testFramework.securityContext`           | `test-framework` securityContext              | `{}`                                                    |
-| `downloadDashboards.env`                  | Environment variables to be passed to the `download-dashboards` container | `{}`                        |
-| `downloadDashboards.envFromSecret`        | Name of a Kubernetes secret (must be manually created in the same namespace) containing values to be added to the environment. Can be templated | `""` |
-| `downloadDashboards.resources`            | Resources of `download-dashboards` container  | `{}`                                                    |
-| `downloadDashboardsImage.repository`      | Curl docker image repo                        | `curlimages/curl`                                       |
-| `downloadDashboardsImage.tag`             | Curl docker image tag                         | `7.73.0`                                                |
-| `downloadDashboardsImage.sha`             | Curl docker image sha (optional)              | `""`                                                    |
-| `downloadDashboardsImage.pullPolicy`      | Curl docker image pull policy                 | `IfNotPresent`                                          |
-| `namespaceOverride`                       | Override the deployment namespace             | `""` (`Release.Namespace`)                              |
-| `serviceMonitor.enabled`                  | Use servicemonitor from prometheus operator   | `false`                                                 |
-| `serviceMonitor.namespace`                | Namespace this servicemonitor is installed in |                                                         |
-| `serviceMonitor.interval`                 | How frequently Prometheus should scrape       | `1m`                                                    |
-| `serviceMonitor.path`                     | Path to scrape                                | `/metrics`                                              |
-| `serviceMonitor.scheme`                   | Scheme to use for metrics scraping            | `http`                                                  |
-| `serviceMonitor.tlsConfig`                | TLS configuration block for the endpoint      | `{}`                                                    |
-| `serviceMonitor.labels`                   | Labels for the servicemonitor passed to Prometheus Operator      |  `{}`                                |
-| `serviceMonitor.scrapeTimeout`            | Timeout after which the scrape is ended       | `30s`                                                   |
-| `serviceMonitor.relabelings`              | MetricRelabelConfigs to apply to samples before ingestion.  | `[]`                                      |
-| `revisionHistoryLimit`                    | Number of old ReplicaSets to retain           | `10`                                                    |
-| `imageRenderer.enabled`                    | Enable the image-renderer deployment & service                                     | `false`                          |
-| `imageRenderer.image.repository`           | image-renderer Image repository                                                    | `grafana/grafana-image-renderer` |
-| `imageRenderer.image.tag`                  | image-renderer Image tag                                                           | `latest`                         |
-| `imageRenderer.image.sha`                  | image-renderer Image sha (optional)                                                | `""`                             |
-| `imageRenderer.image.pullPolicy`           | image-renderer ImagePullPolicy                                                     | `Always`                         |
-| `imageRenderer.env`                        | extra env-vars for image-renderer                                                  | `{}`                             |
-| `imageRenderer.serviceAccountName`         | image-renderer deployment serviceAccountName                                       | `""`                             |
-| `imageRenderer.securityContext`            | image-renderer deployment securityContext                                          | `{}`                             |
-| `imageRenderer.hostAliases`                | image-renderer deployment Host Aliases                                             | `[]`                             |
-| `imageRenderer.priorityClassName`          | image-renderer deployment priority class                                           | `''`                             |
-| `imageRenderer.service.enabled`            | Enable the image-renderer service                                                  | `true`                           |
-| `imageRenderer.service.portName`           | image-renderer service port name                                                   | `http`                           |
-| `imageRenderer.service.port`               | image-renderer port used by deployment                                             | `8081`                           |
-| `imageRenderer.service.targetPort`         | image-renderer service port used by service                                        | `8081`                           |
-| `imageRenderer.appProtocol`                | Adds the appProtocol field to the service                                          | ``                               |
-| `imageRenderer.grafanaSubPath`             | Grafana sub path to use for image renderer callback url                            | `''`                             |
-| `imageRenderer.podPortName`                | name of the image-renderer port on the pod                                         | `http`                           |
-| `imageRenderer.revisionHistoryLimit`       | number of image-renderer replica sets to keep                                      | `10`                             |
-| `imageRenderer.networkPolicy.limitIngress` | Enable a NetworkPolicy to limit inbound traffic from only the created grafana pods | `true`                           |
-| `imageRenderer.networkPolicy.limitEgress`  | Enable a NetworkPolicy to limit outbound traffic to only the created grafana pods  | `false`                          |
-| `imageRenderer.resources`                  | Set resource limits for image-renderer pdos                                        | `{}`                             |
-| `imageRenderer.nodeSelector`               | Node labels for pod assignment                | `{}`                                                    |
-| `imageRenderer.tolerations`                | Toleration labels for pod assignment          | `[]`                                                    |
-| `imageRenderer.affinity`                   | Affinity settings for pod assignment          | `{}`                                                    |
-| `networkPolicy.enabled`                    | Enable creation of NetworkPolicy resources.                                                                              | `false`             |
-| `networkPolicy.allowExternal`              | Don't require client label for connections                                                                               | `true`              |
-| `networkPolicy.explicitNamespacesSelector` | A Kubernetes LabelSelector to explicitly select namespaces from which traffic could be allowed                           | `{}`                |
-| `networkPolicy.ingress`                    | Enable the creation of an ingress network policy             | `true`    |
-| `networkPolicy.egress.enabled`             | Enable the creation of an egress network policy              | `false`   |
-| `networkPolicy.egress.ports`               | An array of ports to allow for the egress                    | `[]`    |
-| `enableKubeBackwardCompatibility`          | Enable backward compatibility of kubernetes where pod's defintion version below 1.13 doesn't have the enableServiceLinks option  | `false`     |
-
-### Example ingress with path
-
-With grafana 6.3 and above
-
-```yaml
-grafana.ini:
-  server:
-    domain: monitoring.example.com
-    root_url: "%(protocol)s://%(domain)s/grafana"
-    serve_from_sub_path: true
-ingress:
-  enabled: true
-  hosts:
-    - "monitoring.example.com"
-  path: "/grafana"
 ```
 
-### Example of extraVolumeMounts
+Its lifecycle is managed using Helm and, at the Grafana container level, the following operations are automated: persistence management, configuration based on environment variables and plugin initialization. The chart also allows deploying dashboards and data sources using ConfigMaps. The Deployments do not require any ServiceAccounts with special RBAC privileges so this solution would fit better in more restricted Kubernetes installations.
 
-Volume can be type persistentVolumeClaim or hostPath but not both at same time.
-If neither existingClaim or hostPath argument is given then type is emptyDir.
+The *bitnami/grafana-operator* chart deploys a Grafana Operator installation using a Kubernetes Deployment.  The figure below shows the Grafana operator deployment after executing *helm install*:
 
-```yaml
-- extraVolumeMounts:
-  - name: plugins
-    mountPath: /var/lib/grafana/plugins
-    subPath: configs/grafana/plugins
-    existingClaim: existing-grafana-claim
-    readOnly: false
-  - name: dashboards
-    mountPath: /var/lib/grafana/dashboards
-    hostPath: /usr/shared/grafana/dashboards
-    readOnly: false
+```text
++--------------------+
+|                    |      +---------------+
+|  Grafana Operator  |      |               |
+|                    |      |     RBAC      |
+|    Deployment      |      |   Privileges  |
+|                    |      |               |
++-------+------------+      +-------+-------+
+        ^                           |
+        |   +-----------------+     |
+        +---+ Service Account +<----+
+            +-----------------+
 ```
 
-## Import dashboards
+The operator will extend the Kubernetes API with the following objects: *Grafana*, *GrafanaDashboards* and *GrafanaDataSources*. From that moment, the user will be able to deploy objects of these kinds and the previously deployed Operator will take care of deploying all the required Deployments, ConfigMaps and Services for running a Grafana instance. Its lifecycle is managed using *kubectl* on the Grafana, GrafanaDashboards and GrafanaDataSource objects. The following figure shows the deployed objects after
+ deploying a *Grafana* object using *kubectl*:
 
-There are a few methods to import dashboards to Grafana. Below are some examples and explanations as to how to use each method:
+```text
++--------------------+
+|                    |      +---------------+
+|  Grafana Operator  |      |               |
+|                    |      |     RBAC      |
+|    Deployment      |      |   Privileges  |
+|                    |      |               |
++--+----+------------+      +-------+-------+
+   |    ^                           |
+   |    |   +-----------------+     |
+   |    +---+ Service Account +<----+
+   |        +-----------------+
+   |
+   |
+   |
+   |
+   |                                                   Grafana
+   |                     +---------------------------------------------------------------------------+
+   |                     |                                                                           |
+   |                     |                          +--------------+             +-----+             |
+   |                     |                          |              |             |     |             |
+   +-------------------->+       Service & Ingress  |    Grafana   +<------------+ PVC |             |
+                         |      <-------------------+              |             |     |             |
+                         |                          |  Deployment  |             +-----+             |
+                         |                          |              |                                 |
+                         |                          +-----------+--+                                 |
+                         |                                      ^                +------------+      |
+                         |                                      |                |            |      |
+                         |                                      +----------------+ Configmaps |      |
+                         |                                                       |   Secrets  |      |
+                         |                                                       |            |      |
+                         |                                                       +------------+      |
+                         |                                                                           |
+                         +---------------------------------------------------------------------------+
 
-```yaml
-dashboards:
-  default:
-    some-dashboard:
-      json: |
-        {
-          "annotations":
-
-          ...
-          # Complete json file here
-          ...
-
-          "title": "Some Dashboard",
-          "uid": "abcd1234",
-          "version": 1
-        }
-    custom-dashboard:
-      # This is a path to a file inside the dashboards directory inside the chart directory
-      file: dashboards/custom-dashboard.json
-    prometheus-stats:
-      # Ref: https://grafana.com/dashboards/2
-      gnetId: 2
-      revision: 2
-      datasource: Prometheus
-    loki-dashboard-quick-search:
-      gnetId: 12019
-      revision: 2
-      datasource:
-      - name: DS_PROMETHEUS
-        value: Prometheus
-      - name: DS_LOKI
-        value: Loki
-    local-dashboard:
-      url: https://raw.githubusercontent.com/user/repository/master/dashboards/dashboard.json
 ```
 
-## BASE64 dashboards
+This solution allows to easily deploy multiple Grafana instances compared to the *bitnami/grafana* chart. As the operator automatically deploys Grafana installations, the Grafana Operator pods will require a ServiceAccount with privileges to create and destroy mulitple Kubernetes objects. This may be problematic for Kubernetes clusters with strict role-based access policies.
 
-Dashboards could be stored on a server that does not return JSON directly and instead of it returns a Base64 encoded file (e.g. Gerrit)
-A new parameter has been added to the url use case so if you specify a b64content value equals to true after the url entry a Base64 decoding is applied before save the file to disk.
-If this entry is not set or is equals to false not decoding is applied to the file before saving it to disk.
+## Parameters
 
-### Gerrit use case
+### Global parameters
 
-Gerrit API for download files has the following schema: <https://yourgerritserver/a/{project-name}/branches/{branch-id}/files/{file-id}/content> where {project-name} and
-{file-id} usually has '/' in their values and so they MUST be replaced by %2F so if project-name is user/repo, branch-id is master and file-id is equals to dir1/dir2/dashboard
-the url value is <https://yourgerritserver/a/user%2Frepo/branches/master/files/dir1%2Fdir2%2Fdashboard/content>
+| Name                      | Description                                     | Value |
+| ------------------------- | ----------------------------------------------- | ----- |
+| `global.imageRegistry`    | Global Docker image registry                    | `""`  |
+| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`  |
+| `global.storageClass`     | Global StorageClass for Persistent Volume(s)    | `""`  |
 
-## Sidecar for dashboards
+### Common parameters
 
-If the parameter `sidecar.dashboards.enabled` is set, a sidecar container is deployed in the grafana
-pod. This container watches all configmaps (or secrets) in the cluster and filters out the ones with
-a label as defined in `sidecar.dashboards.label`. The files defined in those configmaps are written
-to a folder and accessed by grafana. Changes to the configmaps are monitored and the imported
-dashboards are deleted/updated.
+| Name                | Description                                                                             | Value           |
+| ------------------- | --------------------------------------------------------------------------------------- | --------------- |
+| `kubeVersion`       | Force target Kubernetes version (using Helm capabilities if not set)                    | `""`            |
+| `extraDeploy`       | Array of extra objects to deploy with the release                                       | `[]`            |
+| `nameOverride`      | String to partially override grafana.fullname template (will maintain the release name) | `""`            |
+| `fullnameOverride`  | String to fully override grafana.fullname template                                      | `""`            |
+| `clusterDomain`     | Default Kubernetes cluster domain                                                       | `cluster.local` |
+| `commonLabels`      | Labels to add to all deployed objects                                                   | `{}`            |
+| `commonAnnotations` | Annotations to add to all deployed objects                                              | `{}`            |
 
-A recommendation is to use one configmap per dashboard, as a reduction of multiple dashboards inside
-one configmap is currently not properly mirrored in grafana.
+### Grafana parameters
 
-Example dashboard config:
+| Name                               | Description                                                                                                                                          | Value                             |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `image.registry`                   | Grafana image registry                                                                                                                               | `docker.io`                       |
+| `image.repository`                 | Grafana image repository                                                                                                                             | `bitnami/grafana`                 |
+| `image.tag`                        | Grafana image tag (immutable tags are recommended)                                                                                                   | `9.4.7-debian-11-r0`              |
+| `image.digest`                     | Grafana image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                                              | `""`                              |
+| `image.pullPolicy`                 | Grafana image pull policy                                                                                                                            | `IfNotPresent`                    |
+| `image.pullSecrets`                | Grafana image pull secrets                                                                                                                           | `[]`                              |
+| `admin.user`                       | Grafana admin username                                                                                                                               | `admin`                           |
+| `admin.password`                   | Admin password. If a password is not provided a random password will be generated                                                                    | `""`                              |
+| `admin.existingSecret`             | Name of the existing secret containing admin password                                                                                                | `""`                              |
+| `admin.existingSecretPasswordKey`  | Password key on the existing secret                                                                                                                  | `password`                        |
+| `smtp.enabled`                     | Enable SMTP configuration                                                                                                                            | `false`                           |
+| `smtp.user`                        | SMTP user                                                                                                                                            | `user`                            |
+| `smtp.password`                    | SMTP password                                                                                                                                        | `password`                        |
+| `smtp.host`                        | Custom host for the smtp server                                                                                                                      | `""`                              |
+| `smtp.fromAddress`                 | From address                                                                                                                                         | `""`                              |
+| `smtp.fromName`                    | From name                                                                                                                                            | `""`                              |
+| `smtp.skipVerify`                  | Enable skip verify                                                                                                                                   | `false`                           |
+| `smtp.existingSecret`              | Name of existing secret containing SMTP credentials (user and password)                                                                              | `""`                              |
+| `smtp.existingSecretUserKey`       | User key on the existing secret                                                                                                                      | `user`                            |
+| `smtp.existingSecretPasswordKey`   | Password key on the existing secret                                                                                                                  | `password`                        |
+| `plugins`                          | Grafana plugins to be installed in deployment time separated by commas                                                                               | `""`                              |
+| `ldap.enabled`                     | Enable LDAP for Grafana                                                                                                                              | `false`                           |
+| `ldap.allowSignUp`                 | Allows LDAP sign up for Grafana                                                                                                                      | `false`                           |
+| `ldap.configuration`               | Specify content for ldap.toml configuration file                                                                                                     | `""`                              |
+| `ldap.configMapName`               | Name of the ConfigMap with the ldap.toml configuration file for Grafana                                                                              | `""`                              |
+| `ldap.secretName`                  | Name of the Secret with the ldap.toml configuration file for Grafana                                                                                 | `""`                              |
+| `ldap.uri`                         | Server URI, eg. ldap://ldap_server:389                                                                                                               | `""`                              |
+| `ldap.binddn`                      | DN of the account used to search in the LDAP server.                                                                                                 | `""`                              |
+| `ldap.bindpw`                      | Password for binddn account.                                                                                                                         | `""`                              |
+| `ldap.basedn`                      | Base DN path where binddn account will search for the users.                                                                                         | `""`                              |
+| `ldap.searchAttribute`             | Field used to match with the user name (uid, samAccountName, cn, etc). This value will be ignored if 'ldap.searchFilter' is set                      | `uid`                             |
+| `ldap.searchFilter`                | User search filter, for example "(cn=%s)" or "(sAMAccountName=%s)" or "(|(sAMAccountName=%s)(userPrincipalName=%s)"                                  | `""`                              |
+| `ldap.extraConfiguration`          | Extra ldap configuration.                                                                                                                            | `""`                              |
+| `ldap.tls.enabled`                 | Enabled TLS configuration.                                                                                                                           | `false`                           |
+| `ldap.tls.startTls`                | Use STARTTLS instead of LDAPS.                                                                                                                       | `false`                           |
+| `ldap.tls.skipVerify`              | Skip any SSL verification (hostanames or certificates)                                                                                               | `false`                           |
+| `ldap.tls.certificatesMountPath`   | Where LDAP certifcates are mounted.                                                                                                                  | `/opt/bitnami/grafana/conf/ldap/` |
+| `ldap.tls.certificatesSecret`      | Secret with LDAP certificates.                                                                                                                       | `""`                              |
+| `ldap.tls.CAFilename`              | CA certificate filename. Should match with the CA entry key in the ldap.tls.certificatesSecret.                                                      | `""`                              |
+| `ldap.tls.certFilename`            | Client certificate filename to authenticate against the LDAP server. Should match with certificate the entry key in the ldap.tls.certificatesSecret. | `""`                              |
+| `ldap.tls.certKeyFilename`         | Client Key filename to authenticate against the LDAP server. Should match with certificate the entry key in the ldap.tls.certificatesSecret.         | `""`                              |
+| `config.useGrafanaIniFile`         | Allows to load a `grafana.ini` file                                                                                                                  | `false`                           |
+| `config.grafanaIniConfigMap`       | Name of the ConfigMap containing the `grafana.ini` file                                                                                              | `""`                              |
+| `config.grafanaIniSecret`          | Name of the Secret containing the `grafana.ini` file                                                                                                 | `""`                              |
+| `dashboardsProvider.enabled`       | Enable the use of a Grafana dashboard provider                                                                                                       | `false`                           |
+| `dashboardsProvider.configMapName` | Name of a ConfigMap containing a custom dashboard provider                                                                                           | `""`                              |
+| `dashboardsConfigMaps`             | Array with the names of a series of ConfigMaps containing dashboards files                                                                           | `[]`                              |
+| `datasources.secretName`           | The name of an externally-managed secret containing custom datasource files.                                                                         | `""`                              |
+| `datasources.secretDefinition`     | The contents of a secret defining a custom datasource file. Only used if datasources.secretName is empty or not defined.                             | `{}`                              |
+| `notifiers.configMapName`          | Name of a ConfigMap containing Grafana notifiers configuration                                                                                       | `""`                              |
+
+### Grafana Deployment parameters
+
+| Name                                         | Description                                                                                             | Value           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------- |
+| `grafana.replicaCount`                       | Number of Grafana nodes                                                                                 | `1`             |
+| `grafana.updateStrategy.type`                | Set up update strategy for Grafana installation.                                                        | `RollingUpdate` |
+| `grafana.hostAliases`                        | Add deployment host aliases                                                                             | `[]`            |
+| `grafana.schedulerName`                      | Alternative scheduler                                                                                   | `""`            |
+| `grafana.terminationGracePeriodSeconds`      | In seconds, time the given to the Grafana pod needs to terminate gracefully                             | `""`            |
+| `grafana.priorityClassName`                  | Priority class name                                                                                     | `""`            |
+| `grafana.podLabels`                          | Extra labels for Grafana pods                                                                           | `{}`            |
+| `grafana.podAnnotations`                     | Grafana Pod annotations                                                                                 | `{}`            |
+| `grafana.podAffinityPreset`                  | Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                     | `""`            |
+| `grafana.podAntiAffinityPreset`              | Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                | `soft`          |
+| `grafana.containerPorts.grafana`             | Grafana container port                                                                                  | `3000`          |
+| `grafana.nodeAffinityPreset.type`            | Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`               | `""`            |
+| `grafana.nodeAffinityPreset.key`             | Node label key to match Ignored if `affinity` is set.                                                   | `""`            |
+| `grafana.nodeAffinityPreset.values`          | Node label values to match. Ignored if `affinity` is set.                                               | `[]`            |
+| `grafana.affinity`                           | Affinity for pod assignment                                                                             | `{}`            |
+| `grafana.nodeSelector`                       | Node labels for pod assignment                                                                          | `{}`            |
+| `grafana.tolerations`                        | Tolerations for pod assignment                                                                          | `[]`            |
+| `grafana.topologySpreadConstraints`          | Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in | `[]`            |
+| `grafana.podSecurityContext.enabled`         | Enable securityContext on for Grafana deployment                                                        | `true`          |
+| `grafana.podSecurityContext.fsGroup`         | Group to configure permissions for volumes                                                              | `1001`          |
+| `grafana.podSecurityContext.runAsUser`       | User for the security context                                                                           | `1001`          |
+| `grafana.podSecurityContext.runAsNonRoot`    | Run containers as non-root users                                                                        | `true`          |
+| `grafana.containerSecurityContext.enabled`   | Enabled Grafana Image Renderer containers' Security Context                                             | `true`          |
+| `grafana.containerSecurityContext.runAsUser` | Set Grafana Image Renderer containers' Security Context runAsUser                                       | `1001`          |
+| `grafana.resources.limits`                   | The resources limits for Grafana containers                                                             | `{}`            |
+| `grafana.resources.requests`                 | The requested resources for Grafana containers                                                          | `{}`            |
+| `grafana.livenessProbe.enabled`              | Enable livenessProbe                                                                                    | `true`          |
+| `grafana.livenessProbe.path`                 | Path for livenessProbe                                                                                  | `/api/health`   |
+| `grafana.livenessProbe.scheme`               | Scheme for livenessProbe                                                                                | `HTTP`          |
+| `grafana.livenessProbe.initialDelaySeconds`  | Initial delay seconds for livenessProbe                                                                 | `120`           |
+| `grafana.livenessProbe.periodSeconds`        | Period seconds for livenessProbe                                                                        | `10`            |
+| `grafana.livenessProbe.timeoutSeconds`       | Timeout seconds for livenessProbe                                                                       | `5`             |
+| `grafana.livenessProbe.failureThreshold`     | Failure threshold for livenessProbe                                                                     | `6`             |
+| `grafana.livenessProbe.successThreshold`     | Success threshold for livenessProbe                                                                     | `1`             |
+| `grafana.readinessProbe.enabled`             | Enable readinessProbe                                                                                   | `true`          |
+| `grafana.readinessProbe.path`                | Path for readinessProbe                                                                                 | `/api/health`   |
+| `grafana.readinessProbe.scheme`              | Scheme for readinessProbe                                                                               | `HTTP`          |
+| `grafana.readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe                                                                | `30`            |
+| `grafana.readinessProbe.periodSeconds`       | Period seconds for readinessProbe                                                                       | `10`            |
+| `grafana.readinessProbe.timeoutSeconds`      | Timeout seconds for readinessProbe                                                                      | `5`             |
+| `grafana.readinessProbe.failureThreshold`    | Failure threshold for readinessProbe                                                                    | `6`             |
+| `grafana.readinessProbe.successThreshold`    | Success threshold for readinessProbe                                                                    | `1`             |
+| `grafana.startupProbe.enabled`               | Enable startupProbe                                                                                     | `false`         |
+| `grafana.startupProbe.path`                  | Path for readinessProbe                                                                                 | `/api/health`   |
+| `grafana.startupProbe.scheme`                | Scheme for readinessProbe                                                                               | `HTTP`          |
+| `grafana.startupProbe.initialDelaySeconds`   | Initial delay seconds for startupProbe                                                                  | `30`            |
+| `grafana.startupProbe.periodSeconds`         | Period seconds for startupProbe                                                                         | `10`            |
+| `grafana.startupProbe.timeoutSeconds`        | Timeout seconds for startupProbe                                                                        | `5`             |
+| `grafana.startupProbe.failureThreshold`      | Failure threshold for startupProbe                                                                      | `6`             |
+| `grafana.startupProbe.successThreshold`      | Success threshold for startupProbe                                                                      | `1`             |
+| `grafana.customLivenessProbe`                | Custom livenessProbe that overrides the default one                                                     | `{}`            |
+| `grafana.customReadinessProbe`               | Custom readinessProbe that overrides the default one                                                    | `{}`            |
+| `grafana.customStartupProbe`                 | Custom startupProbe that overrides the default one                                                      | `{}`            |
+| `grafana.lifecycleHooks`                     | for the Grafana container(s) to automate configuration before or after startup                          | `{}`            |
+| `grafana.sidecars`                           | Attach additional sidecar containers to the Grafana pod                                                 | `[]`            |
+| `grafana.initContainers`                     | Add additional init containers to the Grafana pod(s)                                                    | `[]`            |
+| `grafana.extraVolumes`                       | Additional volumes for the Grafana pod                                                                  | `[]`            |
+| `grafana.extraVolumeMounts`                  | Additional volume mounts for the Grafana container                                                      | `[]`            |
+| `grafana.extraEnvVarsCM`                     | Name of existing ConfigMap containing extra env vars for Grafana nodes                                  | `""`            |
+| `grafana.extraEnvVarsSecret`                 | Name of existing Secret containing extra env vars for Grafana nodes                                     | `""`            |
+| `grafana.extraEnvVars`                       | Array containing extra env vars to configure Grafana                                                    | `[]`            |
+| `grafana.extraConfigmaps`                    | Array to mount extra ConfigMaps to configure Grafana                                                    | `[]`            |
+| `grafana.command`                            | Override default container command (useful when using custom images)                                    | `[]`            |
+| `grafana.args`                               | Override default container args (useful when using custom images)                                       | `[]`            |
+
+### Persistence parameters
+
+| Name                        | Description                                                                                               | Value           |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistence                                                                                        | `true`          |
+| `persistence.annotations`   | Persistent Volume Claim annotations                                                                       | `{}`            |
+| `persistence.accessMode`    | Persistent Volume Access Mode                                                                             | `ReadWriteOnce` |
+| `persistence.accessModes`   | Persistent Volume Access Modes                                                                            | `[]`            |
+| `persistence.storageClass`  | Storage class to use with the PVC                                                                         | `""`            |
+| `persistence.existingClaim` | If you want to reuse an existing claim, you can pass the name of the PVC using the existingClaim variable | `""`            |
+| `persistence.size`          | Size for the PV                                                                                           | `10Gi`          |
+
+### RBAC parameters
+
+| Name                                          | Description                                                                                                           | Value   |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a ServiceAccount should be created                                                                  | `true`  |
+| `serviceAccount.name`                         | The name of the ServiceAccount to use. If not set and create is true, a name is generated using the fullname template | `""`    |
+| `serviceAccount.annotations`                  | Annotations to add to the ServiceAccount Metadata                                                                     | `{}`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token for the application controller service account                                        | `false` |
+
+### Traffic exposure parameters
+
+| Name                               | Description                                                                                                                      | Value                    |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `service.type`                     | Kubernetes Service type                                                                                                          | `ClusterIP`              |
+| `service.clusterIP`                | Grafana service Cluster IP                                                                                                       | `""`                     |
+| `service.ports.grafana`            | Grafana service port                                                                                                             | `3000`                   |
+| `service.nodePorts.grafana`        | Specify the nodePort value for the LoadBalancer and NodePort service types                                                       | `""`                     |
+| `service.loadBalancerIP`           | loadBalancerIP if Grafana service type is `LoadBalancer` (optional, cloud specific)                                              | `""`                     |
+| `service.loadBalancerSourceRanges` | loadBalancerSourceRanges if Grafana service type is `LoadBalancer` (optional, cloud specific)                                    | `[]`                     |
+| `service.annotations`              | Provide any additional annotations which may be required.                                                                        | `{}`                     |
+| `service.externalTrafficPolicy`    | Grafana service external traffic policy                                                                                          | `Cluster`                |
+| `service.extraPorts`               | Extra port to expose on Redmine service                                                                                          | `[]`                     |
+| `service.sessionAffinity`          | Session Affinity for Kubernetes service, can be "None" or "ClientIP"                                                             | `None`                   |
+| `service.sessionAffinityConfig`    | Additional settings for the sessionAffinity                                                                                      | `{}`                     |
+| `ingress.enabled`                  | Set to true to enable ingress record generation                                                                                  | `false`                  |
+| `ingress.pathType`                 | Ingress Path type                                                                                                                | `ImplementationSpecific` |
+| `ingress.apiVersion`               | Override API Version (automatically detected if not set)                                                                         | `""`                     |
+| `ingress.hostname`                 | When the ingress is enabled, a host pointing to this will be created                                                             | `grafana.local`          |
+| `ingress.path`                     | Default path for the ingress resource                                                                                            | `/`                      |
+| `ingress.annotations`              | Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations. | `{}`                     |
+| `ingress.tls`                      | Enable TLS configuration for the hostname defined at ingress.hostname parameter                                                  | `false`                  |
+| `ingress.extraHosts`               | The list of additional hostnames to be covered with this ingress record.                                                         | `[]`                     |
+| `ingress.extraPaths`               | Any additional arbitrary paths that may need to be added to the ingress under the main host.                                     | `[]`                     |
+| `ingress.extraTls`                 | The tls configuration for additional hostnames to be covered with this ingress record.                                           | `[]`                     |
+| `ingress.secrets`                  | If you're providing your own certificates, please use this to add the certificates as secrets                                    | `[]`                     |
+| `ingress.secrets`                  | It is also possible to create and manage the certificates outside of this helm chart                                             | `[]`                     |
+| `ingress.selfSigned`               | Create a TLS secret for this ingress record using self-signed certificates generated by Helm                                     | `false`                  |
+| `ingress.ingressClassName`         | IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)                                                    | `""`                     |
+| `ingress.extraRules`               | Additional rules to be covered with this ingress record                                                                          | `[]`                     |
+
+### Metrics parameters
+
+| Name                                       | Description                                                                                                                               | Value   |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `metrics.enabled`                          | Enable the export of Prometheus metrics                                                                                                   | `false` |
+| `metrics.service.annotations`              | Annotations for Prometheus metrics service                                                                                                | `{}`    |
+| `metrics.serviceMonitor.enabled`           | if `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)                                    | `false` |
+| `metrics.serviceMonitor.namespace`         | Namespace in which Prometheus is running                                                                                                  | `""`    |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped.                                                                                              | `""`    |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                                                                   | `""`    |
+| `metrics.serviceMonitor.selector`          | Prometheus instance selector labels                                                                                                       | `{}`    |
+| `metrics.serviceMonitor.relabelings`       | RelabelConfigs to apply to samples before scraping                                                                                        | `[]`    |
+| `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                                                                                 | `[]`    |
+| `metrics.serviceMonitor.honorLabels`       | Labels to honor to add to the scrape endpoint                                                                                             | `false` |
+| `metrics.serviceMonitor.labels`            | Additional custom labels for the ServiceMonitor                                                                                           | `{}`    |
+| `metrics.serviceMonitor.jobLabel`          | The name of the label on the target service to use as the job name in prometheus.                                                         | `""`    |
+| `metrics.prometheusRule.enabled`           | if `true`, creates a Prometheus Operator PrometheusRule (also requires `metrics.enabled` to be `true` and `metrics.prometheusRule.rules`) | `false` |
+| `metrics.prometheusRule.namespace`         | Namespace for the PrometheusRule Resource (defaults to the Release Namespace)                                                             | `""`    |
+| `metrics.prometheusRule.additionalLabels`  | Additional labels that can be used so PrometheusRule will be discovered by Prometheus                                                     | `{}`    |
+| `metrics.prometheusRule.rules`             | PrometheusRule rules to configure                                                                                                         | `[]`    |
+
+### Grafana Image Renderer parameters
+
+| Name                                                     | Description                                                                                                                               | Value                            |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `imageRenderer.enabled`                                  | Enable using a remote rendering service to render PNG images                                                                              | `false`                          |
+| `imageRenderer.image.registry`                           | Grafana Image Renderer image registry                                                                                                     | `docker.io`                      |
+| `imageRenderer.image.repository`                         | Grafana Image Renderer image repository                                                                                                   | `bitnami/grafana-image-renderer` |
+| `imageRenderer.image.tag`                                | Grafana Image Renderer image tag (immutable tags are recommended)                                                                         | `3.6.4-debian-11-r12`            |
+| `imageRenderer.image.digest`                             | Grafana Image Renderer image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                    | `""`                             |
+| `imageRenderer.image.pullPolicy`                         | Grafana Image Renderer image pull policy                                                                                                  | `IfNotPresent`                   |
+| `imageRenderer.image.pullSecrets`                        | Grafana image Renderer pull secrets                                                                                                       | `[]`                             |
+| `imageRenderer.replicaCount`                             | Number of Grafana Image Renderer Pod replicas                                                                                             | `1`                              |
+| `imageRenderer.updateStrategy.type`                      | Grafana Image Renderer deployment strategy type.                                                                                          | `RollingUpdate`                  |
+| `imageRenderer.podAnnotations`                           | Grafana Image Renderer Pod annotations                                                                                                    | `{}`                             |
+| `imageRenderer.podLabels`                                | Extra labels for Grafana Image Renderer pods                                                                                              | `{}`                             |
+| `imageRenderer.nodeSelector`                             | Node labels for pod assignment                                                                                                            | `{}`                             |
+| `imageRenderer.hostAliases`                              | Grafana Image Renderer pods host aliases                                                                                                  | `[]`                             |
+| `imageRenderer.tolerations`                              | Tolerations for pod assignment                                                                                                            | `[]`                             |
+| `imageRenderer.priorityClassName`                        | Grafana Image Renderer pods' priorityClassName                                                                                            | `""`                             |
+| `imageRenderer.schedulerName`                            | Name of the k8s scheduler (other than default)                                                                                            | `""`                             |
+| `imageRenderer.terminationGracePeriodSeconds`            | In seconds, time the given to the Grafana Image Renderer pod needs to terminate gracefully                                                | `""`                             |
+| `imageRenderer.topologySpreadConstraints`                | Topology Spread Constraints for pod assignment                                                                                            | `[]`                             |
+| `imageRenderer.podAffinityPreset`                        | Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                                       | `""`                             |
+| `imageRenderer.podAntiAffinityPreset`                    | Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                                  | `soft`                           |
+| `imageRenderer.nodeAffinityPreset.type`                  | Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                                 | `""`                             |
+| `imageRenderer.nodeAffinityPreset.key`                   | Node label key to match Ignored if `affinity` is set.                                                                                     | `""`                             |
+| `imageRenderer.nodeAffinityPreset.values`                | Node label values to match. Ignored if `affinity` is set.                                                                                 | `[]`                             |
+| `imageRenderer.extraEnvVars`                             | Array containing extra env vars to configure Grafana                                                                                      | `[]`                             |
+| `imageRenderer.affinity`                                 | Affinity for pod assignment                                                                                                               | `{}`                             |
+| `imageRenderer.resources.limits`                         | The resources limits for Grafana containers                                                                                               | `{}`                             |
+| `imageRenderer.resources.requests`                       | The requested resources for Grafana containers                                                                                            | `{}`                             |
+| `imageRenderer.podSecurityContext.enabled`               | Enable securityContext on for Grafana Image Renderer deployment                                                                           | `true`                           |
+| `imageRenderer.podSecurityContext.fsGroup`               | Group to configure permissions for volumes                                                                                                | `1001`                           |
+| `imageRenderer.podSecurityContext.runAsUser`             | User for the security context                                                                                                             | `1001`                           |
+| `imageRenderer.podSecurityContext.runAsNonRoot`          | Run containers as non-root users                                                                                                          | `true`                           |
+| `imageRenderer.containerSecurityContext.enabled`         | Enabled Grafana Image Renderer containers' Security Context                                                                               | `true`                           |
+| `imageRenderer.containerSecurityContext.runAsUser`       | Set Grafana Image Renderer containers' Security Context runAsUser                                                                         | `1001`                           |
+| `imageRenderer.service.type`                             | Kubernetes Service type                                                                                                                   | `ClusterIP`                      |
+| `imageRenderer.service.clusterIP`                        | Grafana service Cluster IP                                                                                                                | `""`                             |
+| `imageRenderer.service.ports.imageRenderer`              | Grafana Image Renderer metrics port                                                                                                       | `8080`                           |
+| `imageRenderer.service.nodePorts.grafana`                | Specify the nodePort value for the LoadBalancer and NodePort service types                                                                | `""`                             |
+| `imageRenderer.service.loadBalancerIP`                   | loadBalancerIP if Grafana service type is `LoadBalancer` (optional, cloud specific)                                                       | `""`                             |
+| `imageRenderer.service.loadBalancerSourceRanges`         | loadBalancerSourceRanges if Grafana service type is `LoadBalancer` (optional, cloud specific)                                             | `[]`                             |
+| `imageRenderer.service.annotations`                      | Provide any additional annotations which may be required.                                                                                 | `{}`                             |
+| `imageRenderer.service.externalTrafficPolicy`            | Grafana service external traffic policy                                                                                                   | `Cluster`                        |
+| `imageRenderer.service.extraPorts`                       | Extra port to expose on Redmine service                                                                                                   | `[]`                             |
+| `imageRenderer.service.sessionAffinity`                  | Session Affinity for Kubernetes service, can be "None" or "ClientIP"                                                                      | `None`                           |
+| `imageRenderer.service.sessionAffinityConfig`            | Additional settings for the sessionAffinity                                                                                               | `{}`                             |
+| `imageRenderer.metrics.enabled`                          | Enable the export of Prometheus metrics                                                                                                   | `false`                          |
+| `imageRenderer.metrics.annotations`                      | Annotations for Prometheus metrics service[object] Prometheus annotations                                                                 | `{}`                             |
+| `imageRenderer.metrics.serviceMonitor.enabled`           | if `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)                                    | `false`                          |
+| `imageRenderer.metrics.serviceMonitor.namespace`         | Namespace in which Prometheus is running                                                                                                  | `""`                             |
+| `imageRenderer.metrics.serviceMonitor.jobLabel`          | The name of the label on the target service to use as the job name in prometheus.                                                         | `""`                             |
+| `imageRenderer.metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped.                                                                                              | `""`                             |
+| `imageRenderer.metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                                                                   | `""`                             |
+| `imageRenderer.metrics.serviceMonitor.relabelings`       | RelabelConfigs to apply to samples before scraping                                                                                        | `[]`                             |
+| `imageRenderer.metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                                                                                 | `[]`                             |
+| `imageRenderer.metrics.serviceMonitor.selector`          | ServiceMonitor selector labels                                                                                                            | `{}`                             |
+| `imageRenderer.metrics.serviceMonitor.labels`            | Extra labels for the ServiceMonitor                                                                                                       | `{}`                             |
+| `imageRenderer.metrics.serviceMonitor.honorLabels`       | honorLabels chooses the metric's labels on collisions with target labels                                                                  | `false`                          |
+| `imageRenderer.metrics.prometheusRule.enabled`           | if `true`, creates a Prometheus Operator PrometheusRule (also requires `metrics.enabled` to be `true` and `metrics.prometheusRule.rules`) | `false`                          |
+| `imageRenderer.metrics.prometheusRule.namespace`         | Namespace for the PrometheusRule Resource (defaults to the Release Namespace)                                                             | `""`                             |
+| `imageRenderer.metrics.prometheusRule.additionalLabels`  | Additional labels that can be used so PrometheusRule will be discovered by Prometheus                                                     | `{}`                             |
+| `imageRenderer.metrics.prometheusRule.rules`             | Prometheus Rule definitions                                                                                                               | `[]`                             |
+| `imageRenderer.initContainers`                           | Add additional init containers to the Grafana Image Renderer pod(s)                                                                       | `[]`                             |
+| `imageRenderer.sidecars`                                 | Add additional sidecar containers to the Grafana Image Renderer pod(s)                                                                    | `[]`                             |
+| `imageRenderer.extraEnvVarsCM`                           | Name of existing ConfigMap containing extra env vars for Grafana Image Renderer nodes                                                     | `""`                             |
+| `imageRenderer.extraEnvVarsSecret`                       | Name of existing Secret containing extra env vars for Grafana Image Renderer nodes                                                        | `""`                             |
+| `imageRenderer.extraVolumes`                             | Optionally specify extra list of additional volumes for the Grafana Image Renderer pod(s)                                                 | `[]`                             |
+| `imageRenderer.extraVolumeMounts`                        | Optionally specify extra list of additional volumeMounts for the Grafana Image Renderer container(s)                                      | `[]`                             |
+| `imageRenderer.command`                                  | Override default container command (useful when using custom images)                                                                      | `[]`                             |
+| `imageRenderer.args`                                     | Override default container args (useful when using custom images)                                                                         | `[]`                             |
+| `imageRenderer.lifecycleHooks`                           | for the Grafana Image Renderer container(s) to automate configuration before or after startup                                             | `{}`                             |
+
+### Volume permissions init Container Parameters
+
+| Name                                                   | Description                                                                                                   | Value                   |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `volumePermissions.enabled`                            | Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`               | `false`                 |
+| `volumePermissions.image.registry`                     | Bitnami Shell image registry                                                                                  | `docker.io`             |
+| `volumePermissions.image.repository`                   | Bitnami Shell image repository                                                                                | `bitnami/bitnami-shell` |
+| `volumePermissions.image.tag`                          | Bitnami Shell image tag (immutable tags are recommended)                                                      | `11-debian-11-r99`      |
+| `volumePermissions.image.digest`                       | Bitnami Shell image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`                    |
+| `volumePermissions.image.pullPolicy`                   | Bitnami Shell image pull policy                                                                               | `IfNotPresent`          |
+| `volumePermissions.image.pullSecrets`                  | Bitnami Shell image pull secrets                                                                              | `[]`                    |
+| `volumePermissions.resources.limits`                   | The resources limits for the init container                                                                   | `{}`                    |
+| `volumePermissions.resources.requests`                 | The requested resources for the init container                                                                | `{}`                    |
+| `volumePermissions.containerSecurityContext.runAsUser` | Set init container's Security Context runAsUser                                                               | `0`                     |
+
+### Diagnostic Mode Parameters
+
+| Name                     | Description                                                                             | Value          |
+| ------------------------ | --------------------------------------------------------------------------------------- | -------------- |
+| `diagnosticMode.enabled` | Enable diagnostic mode (all probes will be disabled and the command will be overridden) | `false`        |
+| `diagnosticMode.command` | Command to override all containers in the deployment                                    | `["sleep"]`    |
+| `diagnosticMode.args`    | Args to override all containers in the deployment                                       | `["infinity"]` |
+
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
+
+```console
+helm install my-release \
+  --set admin.user=admin-user my-repo/grafana
+```
+
+The above command sets the Grafana admin user to `admin-user`.
+
+> NOTE: Once this chart is deployed, it is not possible to change the application's access credentials, such as usernames or passwords, using Helm. To change these application credentials after deployment, delete any persistent volumes (PVs) used by the chart and re-deploy it, or use the application's built-in administrative tools if available.
+
+Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
+
+```console
+helm install my-release -f values.yaml my-repo/grafana
+```
+
+> **Tip**: You can use the default [values.yaml](values.yaml)
+
+## Configuration and installation details
+
+### [Rolling VS Immutable tags](https://docs.bitnami.com/containers/how-to/understand-rolling-tags-containers/)
+
+It is strongly recommended to use immutable tags in a production environment. This ensures your deployment does not change automatically if the same tag is updated with a different image.
+
+Bitnami will release a new chart updating its containers if a new version of the main container, significant changes, or critical vulnerabilities exist.
+
+### Using custom configuration
+
+Grafana supports multiples configuration files. Using kubernetes you can mount a file using a ConfigMap or a Secret. For example, to mount a custom `grafana.ini` file or `custom.ini` file you can create a ConfigMap like the following:
 
 ```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sample-grafana-dashboard
-  labels:
-     grafana_dashboard: "1"
+  name: myconfig
 data:
-  k8s-dashboard.json: |-
-  [...]
+  grafana.ini: |-
+    # Raw text of the file
 ```
 
-## Sidecar for datasources
+And now you need to pass the ConfigMap name, to the corresponding parameters: `config.useGrafanaIniFile=true` and `config.grafanaIniConfigMap=myconfig`.
 
-If the parameter `sidecar.datasources.enabled` is set, an init container is deployed in the grafana
-pod. This container lists all secrets (or configmaps, though not recommended) in the cluster and
-filters out the ones with a label as defined in `sidecar.datasources.label`. The files defined in
-those secrets are written to a folder and accessed by grafana on startup. Using these yaml files,
-the data sources in grafana can be imported.
+To provide dashboards on deployment time, Grafana needs a dashboards provider and the dashboards themselves.
+A default provider is created if enabled, or you can mount your own provider using a ConfigMap, but have in mind that the path to the dashboard folder must be `/opt/bitnami/grafana/dashboards`.
 
-Secrets are recommended over configmaps for this usecase because datasources usually contain private
-data like usernames and passwords. Secrets are the more appropriate cluster resource to manage those.
+  1. To create a dashboard, it is needed to have a datasource for it. The datasources must be created mounting a secret with all the datasource files in it. In this case, it is not a ConfigMap because the datasource could contain sensitive information.
+  2. To load the dashboards themselves you need to create a ConfigMap for each one containing the `json` file that defines the dashboard and set the array with the ConfigMap names into the `dashboardsConfigMaps` parameter.
+Note the difference between the datasources and the dashboards creation. For the datasources we can use just one secret with all of the files, while for the dashboards we need one ConfigMap per file.
 
-Example values to add a datasource adapted from [Grafana](http://docs.grafana.org/administration/provisioning/#example-datasource-config-file):
+For example, create the dashboard ConfigMap(s) and datasource Secret as described below:
 
-```yaml
-datasources:
- datasources.yaml:
-   apiVersion: 1
-   datasources:
-      # <string, required> name of the datasource. Required
-    - name: Graphite
-      # <string, required> datasource type. Required
-      type: graphite
-      # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
-      access: proxy
-      # <int> org id. will default to orgId 1 if not specified
-      orgId: 1
-      # <string> url
-      url: http://localhost:8080
-      # <string> database password, if used
-      password:
-      # <string> database user, if used
-      user:
-      # <string> database name, if used
-      database:
-      # <bool> enable/disable basic auth
-      basicAuth:
-      # <string> basic auth username
-      basicAuthUser:
-      # <string> basic auth password
-      basicAuthPassword:
-      # <bool> enable/disable with credentials headers
-      withCredentials:
-      # <bool> mark as default datasource. Max one per org
-      isDefault:
-      # <map> fields that will be converted to json and stored in json_data
-      jsonData:
-         graphiteVersion: "1.1"
-         tlsAuth: true
-         tlsAuthWithCACert: true
-      # <string> json object of data that will be encrypted.
-      secureJsonData:
-        tlsCACert: "..."
-        tlsClientCert: "..."
-        tlsClientKey: "..."
-      version: 1
-      # <bool> allow users to edit datasources from the UI.
-      editable: false
+```console
+kubectl create secret generic datasource-secret --from-file=datasource-secret.yaml
+kubectl create configmap my-dashboard-1 --from-file=my-dashboard-1.json
+kubectl create configmap my-dashboard-2 --from-file=my-dashboard-2.json
 ```
 
-## Sidecar for notifiers
+> Note: the commands above assume you had previously exported your dashboards in the JSON files: *my-dashboard-1.json* and *my-dashboard-2.json*
+> Note: the commands above assume you had previously created a datasource config file *datasource-secret.yaml*. Find an example at <https://grafana.com/docs/grafana/latest/administration/provisioning/#example-datasource-config-file>
 
-If the parameter `sidecar.notifiers.enabled` is set, an init container is deployed in the grafana
-pod. This container lists all secrets (or configmaps, though not recommended) in the cluster and
-filters out the ones with a label as defined in `sidecar.notifiers.label`. The files defined in
-those secrets are written to a folder and accessed by grafana on startup. Using these yaml files,
-the notification channels in grafana can be imported. The secrets must be created before
-`helm install` so that the notifiers init container can list the secrets.
+Once you have them, use the following parameters to deploy Grafana with 2 custom dashboards:
 
-Secrets are recommended over configmaps for this usecase because alert notification channels usually contain
-private data like SMTP usernames and passwords. Secrets are the more appropriate cluster resource to manage those.
-
-Example datasource config adapted from [Grafana](https://grafana.com/docs/grafana/latest/administration/provisioning/#alert-notification-channels):
-
-```yaml
-notifiers:
-  - name: notification-channel-1
-    type: slack
-    uid: notifier1
-    # either
-    org_id: 2
-    # or
-    org_name: Main Org.
-    is_default: true
-    send_reminder: true
-    frequency: 1h
-    disable_resolve_message: false
-    # See `Supported Settings` section for settings supporter for each
-    # alert notification type.
-    settings:
-      recipient: 'XXX'
-      token: 'xoxb'
-      uploadImage: true
-      url: https://slack.com
-
-delete_notifiers:
-  - name: notification-channel-1
-    uid: notifier1
-    org_id: 2
-  - name: notification-channel-2
-    # default org_id: 1
+```console
+dashboardsProvider.enabled=true
+datasources.secretName=datasource-secret
+dashboardsConfigMaps[0].configMapName=my-dashboard-1
+dashboardsConfigMaps[0].fileName=my-dashboard-1.json
+dashboardsConfigMaps[1].configMapName=my-dashboard-2
+dashboardsConfigMaps[1].fileName=my-dashboard-2.json
 ```
 
-## Provision alert rules, contact points, notification policies and notification templates
+More info at [Grafana documentation](https://grafana.com/docs/grafana/latest/administration/provisioning/#dashboards).
 
-There are two methods to provision alerting configuration in Grafana. Below are some examples and explanations as to how to use each method:
+### LDAP configuration
 
-```yaml
-alerting:
-  team1-alert-rules.yaml:
-    file: alerting/team1/rules.yaml
-  team2-alert-rules.yaml:
-    file: alerting/team2/rules.yaml
-  team3-alert-rules.yaml:
-    file: alerting/team3/rules.yaml
-  notification-policies.yaml:
-    file: alerting/shared/notification-policies.yaml
-  notification-templates.yaml:
-    file: alerting/shared/notification-templates.yaml
-  contactpoints.yaml:
-    apiVersion: 1
-    contactPoints:
-      - orgId: 1
-        name: Slack channel
-        receivers:
-          - uid: default-receiver
-            type: slack
-            settings:
-              # Webhook URL to be filled in
-              url: ""
-              # We need to escape double curly braces for the tpl function.
-              text: '{{ `{{ template "default.message" . }}` }}'
-              title: '{{ `{{ template "default.title" . }}` }}'
-```
+To enable LDAP authentication it is necessary to provide a ConfigMap with the Grafana LDAP configuration file. For instance:
 
-There are two possibilities:
-
-* Inlining the file contents as described in the example `values.yaml` and the official [Grafana documentation](https://grafana.com/docs/grafana/next/alerting/set-up/provision-alerting-resources/file-provisioning/).
-* Importing a file using a relative path starting from the chart root directory.
-
-### Important notes on file provisioning
-
-* The chart supports importing YAML and JSON files.
-* The filename must be unique, otherwise one volume mount will overwrite the other.
-* In case of inlining, double curly braces that arise from the Grafana configuration format and are not intended as templates for the chart must be escaped.
-* The number of total files under `alerting:` is not limited. Each file will end up as a volume mount in the corresponding provisioning folder of the deployed Grafana instance.
-* The file size for each import is limited by what the function `.Files.Get` can handle, which suffices for most cases.
-
-## How to serve Grafana with a path prefix (/grafana)
-
-In order to serve Grafana with a prefix (e.g., <http://example.com/grafana>), add the following to your values.yaml.
+**configmap.yaml**:
 
 ```yaml
-ingress:
-  enabled: true
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
-
-  path: /grafana/?(.*)
-  hosts:
-    - k8s.example.dev
-
-grafana.ini:
-  server:
-    root_url: http://localhost:3000/grafana # this host can be localhost
-```
-
-## How to securely reference secrets in grafana.ini
-
-This example uses Grafana [file providers](https://grafana.com/docs/grafana/latest/administration/configuration/#file-provider) for secret values and the `extraSecretMounts` configuration flag (Additional grafana server secret mounts) to mount the secrets.
-
-In grafana.ini:
-
-```yaml
-grafana.ini:
-  [auth.generic_oauth]
-  enabled = true
-  client_id = $__file{/etc/secrets/auth_generic_oauth/client_id}
-  client_secret = $__file{/etc/secrets/auth_generic_oauth/client_secret}
-```
-
-Existing secret, or created along with helm:
-
-```yaml
----
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
-  name: auth-generic-oauth-secret
-type: Opaque
-stringData:
-  client_id: <value>
-  client_secret: <value>
+  name: ldap-config
+data:
+  ldap.toml: |-
+      [[servers]]
+      # Ldap server host (specify multiple hosts space separated)
+      host = "ldap"
+      # Default port is 389 or 636 if use_ssl = true
+      port = 389
+      # Set to true if ldap server supports TLS
+      use_ssl = false
+      # Set to true if connect ldap server with STARTTLS pattern (create connection in insecure, then upgrade to secure connection with TLS)
+      start_tls = false
+      # set to true if you want to skip ssl cert validation
+      ssl_skip_verify = false
+      # set to the path to your root CA certificate or leave unset to use system defaults
+      # root_ca_cert = "/path/to/certificate.crt"
+      # Authentication against LDAP servers requiring client certificates
+      # client_cert = "/path/to/client.crt"
+      # client_key = "/path/to/client.key"
+
+      # Search user bind dn
+      bind_dn = "cn=admin,dc=example,dc=org"
+      # Search user bind password
+      # If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
+      bind_password = 'admin'
+
+      # User search filter, for example "(cn=%s)" or "(sAMAccountName=%s)" or "(uid=%s)"
+      # Allow login from email or username, example "(|(sAMAccountName=%s)(userPrincipalName=%s))"
+      search_filter = "(uid=%s)"
+
+      # An array of base dns to search through
+      search_base_dns = ["ou=People,dc=support,dc=example,dc=org"]
+
+      # group_search_filter = "(&(objectClass=posixGroup)(memberUid=%s))"
+      # group_search_filter_user_attribute = "distinguishedName"
+      # group_search_base_dns = ["ou=groups,dc=grafana,dc=org"]
+
+      # Specify names of the ldap attributes your ldap uses
+      [servers.attributes]
+      name = "givenName"
+      surname = "sn"
+      username = "cn"
+      member_of = "memberOf"
+      email =  "email"
 ```
 
-Include in the `extraSecretMounts` configuration flag:
+Create the ConfigMap into the cluster and deploy the Grafana Helm Chart using the existing ConfigMap and the following parameters:
 
-```yaml
-- extraSecretMounts:
-  - name: auth-generic-oauth-secret-mount
-    secretName: auth-generic-oauth-secret
-    defaultMode: 0440
-    mountPath: /etc/secrets/auth_generic_oauth
-    readOnly: true
+```console
+ldap.enabled=true
+ldap.configMapName=ldap-config
+ldap.allowSignUp=true
 ```
 
-### extraSecretMounts using a Container Storage Interface (CSI) provider
+### Supporting HA (High Availability)
 
-This example uses a CSI driver e.g. retrieving secrets using [Azure Key Vault Provider](https://github.com/Azure/secrets-store-csi-driver-provider-azure)
+To support HA Grafana just need an external database where store dashboards, users and other persistent data.
+To configure the external database provide a configuration file containing the [database section](https://grafana.com/docs/installation/configuration/#database)
 
-```yaml
-- extraSecretMounts:
-  - name: secrets-store-inline
-    mountPath: /run/secrets
-    readOnly: true
-    csi:
-      driver: secrets-store.csi.k8s.io
-      readOnly: true
-      volumeAttributes:
-        secretProviderClass: "my-provider"
-      nodePublishSecretRef:
-        name: akv-creds
+More information about Grafana HA [here](https://grafana.com/docs/tutorials/ha_setup/)
+
+### Setting Pod's affinity
+
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+
+As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/main/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
+
+## Persistence
+
+The [Bitnami Grafana](https://github.com/bitnami/containers/tree/main/bitnami/grafana) image stores the Grafana data and configurations at the `/opt/bitnami/grafana/data` path of the container.
+
+Persistent Volume Claims are used to keep the data across deployments. This is known to work in GCE, AWS, and minikube.
+See the [Parameters](#parameters) section to configure the PVC or to disable persistence.
+
+## Troubleshooting
+
+Find more information about how to deal with common errors related to Bitnami's Helm charts in [this troubleshooting guide](https://docs.bitnami.com/general/how-to/troubleshoot-helm-chart-issues).
+
+## Upgrading
+
+### To 8.0.0
+
+This major release only bumps the Grafana version to 9.x. No major issues are expected during the upgrade. See the upstream changelog <https://grafana.com/docs/grafana/latest/release-notes/release-notes-9-0-0/> for more info about the changes included in this new major version of the application
+
+### To 7.0.0
+
+This major release renames several values in this chart and adds missing features, in order to be inline with the rest of assets in the Bitnami charts repository.
+
+Since the volume access mode when persistence is enabled is `ReadWriteOnce` in order to upgrade the deployment you will need to either use the `Recreate` strategy or delete the old deployment.
+
+```console
+kubectl delete deployment <deployment-name>
+helm upgrade <release-name> my-repo/grafana
 ```
 
-## Image Renderer Plug-In
+### To 4.1.0
 
-This chart supports enabling [remote image rendering](https://github.com/grafana/grafana-image-renderer/blob/master/README.md#run-in-docker)
+This version also introduces `bitnami/common`, a [library chart](https://helm.sh/docs/topics/library_charts/#helm) as a dependency. More documentation about this new utility could be found [here](https://github.com/bitnami/charts/tree/main/bitnami/common#bitnami-common-library-chart). Please, make sure that you have updated the chart dependencies before executing any upgrade.
 
-```yaml
-imageRenderer:
-  enabled: true
-```
+### To 4.0.0
 
-### Image Renderer NetworkPolicy
+[On November 13, 2020, Helm v2 support was formally finished](https://github.com/helm/charts#status-of-the-project), this major version is the result of the required changes applied to the Helm Chart to be able to incorporate the different features added in Helm v3 and to be consistent with the Helm project itself regarding the Helm v2 EOL.
 
-By default the image-renderer pods will have a network policy which only allows ingress traffic from the created grafana instance
+#### What changes were introduced in this major version?
 
-### High Availability for unified alerting
+- Previous versions of this Helm Chart use `apiVersion: v1` (installable by both Helm 2 and 3), this Helm Chart was updated to `apiVersion: v2` (installable by Helm 3 only). [Here](https://helm.sh/docs/topics/charts/#the-apiversion-field) you can find more information about the `apiVersion` field.
+- The different fields present in the *Chart.yaml* file has been ordered alphabetically in a homogeneous way for all the Bitnami Helm Charts
 
-If you want to run Grafana in a high availability cluster you need to enable
-the headless service by setting `headlessService: true` in your `values.yaml`
-file.
+#### Considerations when upgrading to this version
 
-As next step you have to setup the `grafana.ini` in your `values.yaml` in a way
-that it will make use of the headless service to obtain all the IPs of the
-cluster. You should replace ``{{ Name }}`` with the name of your helm deployment.
+- If you want to upgrade to this version from a previous one installed with Helm v3, you shouldn't face any issues
+- If you want to upgrade to this version using Helm v2, this scenario is not supported as this version doesn't support Helm v2 anymore
+- If you installed the previous version with Helm v2 and wants to upgrade to this version with Helm v3, please refer to the [official Helm documentation](https://helm.sh/docs/topics/v2_v3_migration/#migration-use-cases) about migrating from Helm v2 to v3
 
-```yaml
-grafana.ini:
-  ...
-  unified_alerting:
-    enabled: true
-    ha_peers: {{ Name }}-headless:9094
-    ha_listen_address: ${POD_IP}:9094
-    ha_advertise_address: ${POD_IP}:9094
+#### Useful links
 
-  alerting:
-    enabled: false
-```
+- <https://docs.bitnami.com/tutorials/resolve-helm2-helm3-post-migration-issues/>
+- <https://helm.sh/docs/topics/v2_v3_migration/>
+- <https://helm.sh/blog/migrate-from-helm-v2-to-helm-v3/>
+
+### To 3.0.0
+
+Deployment label selector is immutable after it gets created, so you cannot "upgrade".
+
+In <https://github.com/bitnami/charts/pull/2773> the deployment label selectors of the resources were updated to add the component name. Resulting in compatibility breakage.
+
+In order to "upgrade" from a previous version, you will need to [uninstall](#uninstalling-the-chart) the existing chart manually.
+
+This major version signifies this change.
+
+## License
+
+Copyright &copy; 2023 Bitnami
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+<http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

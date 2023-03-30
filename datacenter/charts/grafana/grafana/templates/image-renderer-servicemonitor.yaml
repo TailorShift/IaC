@@ -1,48 +1,46 @@
-{{- if .Values.imageRenderer.serviceMonitor.enabled }}
----
+{{- if and .Values.imageRenderer.metrics.enabled .Values.imageRenderer.metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "grafana.fullname" . }}-image-renderer
-  {{- if .Values.imageRenderer.serviceMonitor.namespace }}
-  namespace: {{ tpl .Values.imageRenderer.serviceMonitor.namespace . }}
-  {{- else }}
-  namespace: {{ include "grafana.namespace" . }}
+  name: {{ include "common.names.fullname" . }}-image-renderer
+  namespace: {{ default .Release.Namespace .Values.imageRenderer.metrics.serviceMonitor.namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: image-renderer
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.imageRenderer.metrics.serviceMonitor.labels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.imageRenderer.metrics.serviceMonitor.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
-  labels:
-    {{- include "grafana.imageRenderer.labels" . | nindent 4 }}
-    {{- with .Values.imageRenderer.serviceMonitor.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
 spec:
-  endpoints:
-  - port: {{ .Values.imageRenderer.service.portName }}
-    {{- with .Values.imageRenderer.serviceMonitor.interval }}
-    interval: {{ . }}
-    {{- end }}
-    {{- with .Values.imageRenderer.serviceMonitor.scrapeTimeout }}
-    scrapeTimeout: {{ . }}
-    {{- end }}
-    honorLabels: true
-    path: {{ .Values.imageRenderer.serviceMonitor.path }}
-    scheme: {{ .Values.imageRenderer.serviceMonitor.scheme }}
-    {{- with .Values.imageRenderer.serviceMonitor.tlsConfig }}
-    tlsConfig:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-    {{- with .Values.imageRenderer.serviceMonitor.relabelings }}
-    relabelings:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-  jobLabel: "{{ .Release.Name }}-image-renderer"
   selector:
-    matchLabels:
-      {{- include "grafana.imageRenderer.selectorLabels" . | nindent 6 }}
+    matchLabels: {{ include "common.labels.matchLabels" . | nindent 6 }}
+      {{- if .Values.imageRenderer.metrics.serviceMonitor.selector }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.imageRenderer.metrics.serviceMonitor.selector "context" $) | nindent 6 }}
+      {{- end }}
+      app.kubernetes.io/component: image-renderer
+  endpoints:
+    - port: http
+      path: "/metrics"
+      {{- if .Values.imageRenderer.metrics.serviceMonitor.interval }}
+      interval: {{ .Values.imageRenderer.metrics.serviceMonitor.interval }}
+      {{- end }}
+      {{- if .Values.imageRenderer.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.imageRenderer.metrics.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.imageRenderer.metrics.serviceMonitor.honorLabels }}
+      honorLabels: {{ .Values.imageRenderer.metrics.serviceMonitor.honorLabels }}
+      {{- end }}
+      {{- if .Values.imageRenderer.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.imageRenderer.metrics.serviceMonitor.metricRelabelings "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.imageRenderer.metrics.serviceMonitor.relabelings }}
+      relabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.imageRenderer.metrics.serviceMonitor.relabelings "context" $) | nindent 8 }}
+      {{- end }}
   namespaceSelector:
     matchNames:
-      - {{ include "grafana.namespace" . }}
-  {{- with .Values.imageRenderer.serviceMonitor.targetLabels }}
-  targetLabels:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+      - {{ .Release.Namespace | quote }}
 {{- end }}
