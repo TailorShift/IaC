@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: datacenter/charts/grafana
+    path: datacenter/charts/grafana/grafana
     repoURL: git@github.com:TailorShift/IaC.git
     targetRevision: HEAD
     helm:
