@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: inventory-manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  selector:
+    app: inventory-manager
