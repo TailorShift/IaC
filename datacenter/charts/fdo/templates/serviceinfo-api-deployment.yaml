@@ -24,7 +24,7 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/fdo/serviceinfo-api-server.conf.d/
-            - name: device_specific_serviceinfo
+            - name: device-specific-serviceinfo
               mountPath: /etc/fdo/device_specific_serviceinfo
             - name: sessions
               mountPath: /etc/fdo/sessions
@@ -35,7 +35,7 @@ spec:
         - name: config
           configMap:
             name: serviceinfo-api-server
-        - name: device_specific_serviceinfo
+        - name: device-specific-serviceinfo
           emptyDir: {}
         - name: sessions
           emptyDir: {}
