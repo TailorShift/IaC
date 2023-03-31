@@ -27,6 +27,8 @@ spec:
                 secretKeyRef:
                   name: pg-backoffice-pguser-pg-backoffice
                   key: jdbc-uri
+            - name: INVENTORY_MANAGER_URL
+              value: https://inventory-manager-atos-development.apps.wa6eqszp.uksouth.aroapp.io
           imagePullPolicy: Always
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
