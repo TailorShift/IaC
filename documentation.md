@@ -196,6 +196,11 @@ The datacenter holds master data for multiple objects: shops, pos devices, produ
     * Due to the IaC approach, for Quarkus apps we just used the extensions for regular docker images and no particular
       OpenShift features.
     * Docker images where built and pushed directly using the quarkus plugins
+* We tried to use of ChatGPT to generate reasonable test data (e.g. existing fashion products with realistic prices).
+  * It worked mostly well for master data (a few syntax errors)
+  * It didn't work for 1:n relations on large tables (trying to fill receiepts with positions). ChatGPT tends to forget
+    its previous output.
+  * We fell back to classic Python scripting to fill the gap.
 
 ## Appendix
 
