@@ -80,7 +80,7 @@ spec:
             defaultMode: 077
         - name: manufacturer-cert
           secret:
-            secretName: fdo-manufacturer-cert
+            secretName: fdo-manufacturing-cert
         - name: owner-cert
           secret:
             secretName: fdo-owner-cert
