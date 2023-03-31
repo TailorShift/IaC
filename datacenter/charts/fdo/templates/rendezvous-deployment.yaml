@@ -27,10 +27,8 @@ spec:
             - name: manufacturing-cert
               mountPath: /etc/fdo/keys/manufacturer_cert.pem
               subPath: tls.crt
-            - name: registered
-              mountPath: /etc/fdo/stores/rendezvous_registered
-            - name: sessions
-              mountPath: /etc/fdo/stores/rendezvous_sessions
+            - name: stores
+              mountPath: /etc/fdo/stores/
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
@@ -41,7 +39,6 @@ spec:
         - name: manufacturing-cert
           secret:
             secretName: fdo-manufacturing-cert
-        - name: registered
-          emptyDir: {}
-        - name: sessions
-          emptyDir: {}
+        - name: stores
+          persistentVolumeClaim:
+            claimName: fdo-stores

@@ -9,7 +9,7 @@ data:
     bind: 0.0.0.0:8080
     device_specific_store_driver:
       Directory:
-        path: /etc/fdo/device_specific_serviceinfo
+        path: /etc/fdo/stores/device_specific_serviceinfo
     service_info_auth_token: TestAuthToken
     admin_auth_token: TestAdminToken
     service_info:

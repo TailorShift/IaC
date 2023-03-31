@@ -50,10 +50,8 @@ spec:
               subPath: config.yml
             - name: certs
               mountPath: /etc/fdo/keys/
-            - name: sessions
-              mountPath: /etc/fdo/stores/owner_onboarding_sessions
-            - name: ownership-vouchers
-              mountPath: /etc/fdo/stores/owner_vouchers
+            - name: stores
+              mountPath: /etc/fdo/stores
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
@@ -71,9 +69,8 @@ spec:
         - name: device-ca-cert
           secret:
             secretName: fdo-device-ca
-        - name: sessions
-          emptyDir: {}
-        - name: ownership-vouchers
-          emptyDir: {}
+        - name: stores
+          persistentVolumeClaim:
+            claimName: fdo-stores
         - name: certs
           emptyDir: {}

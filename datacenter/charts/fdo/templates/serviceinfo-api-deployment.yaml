@@ -24,10 +24,8 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/fdo/serviceinfo-api-server.conf.d/
-            - name: device-specific-serviceinfo
-              mountPath: /etc/fdo/device_specific_serviceinfo
-            - name: sessions
-              mountPath: /etc/fdo/sessions
+            - name: stores
+              mountPath: /etc/fdo/stores/
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
@@ -35,7 +33,6 @@ spec:
         - name: config
           configMap:
             name: serviceinfo-api-server
-        - name: device-specific-serviceinfo
-          emptyDir: {}
-        - name: sessions
-          emptyDir: {}
+        - name: stores
+          persistentVolumeClaim:
+            claimName: fdo-stores
