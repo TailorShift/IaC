@@ -10,11 +10,11 @@ Update the contents
 
 See what grafana has available
 
-    helm search repo grafana/grafana --versions
+    helm search repo grafana --versions
 
-Pick a suitable version, and download the chart files
+Pick a suitable version, and download the chart files. we use bitnami because grafana/grafana sets securityContext which conflicts with openshift ssc
 
-    helm pull grafana/grafana --untar --version 6.52.4 
+    helm pull bitnami/grafana --untar --version 8.2.32
 
 
 Pull up the default values file from the chart for prod and dev
