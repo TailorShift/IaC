@@ -91,7 +91,7 @@ authorization cards) by requesting numeric input instead.
 
 #### The backoffice(s)
 
-The backoffice is a single node OpenShift cluster. Due to our remote development we used the provisioned one by Atos.
+The backoffice is a single node OpenShift cluster. Due to our remote development we used the provisioned one for Atos.
 
 All data is persisted in a Postges database (provisioned by CrunchyDB). The database schema is managed by Flyway. For
 simplified development we use the same schema for both datacenters.
@@ -186,7 +186,7 @@ The datacenter holds master data for multiple objects: shops, pos devices, produ
 
 ### Other considerations
 
-* The OpenShift clusters are developed as "infrastructure-as-code" and a such managed via ArgoCD. This applies to the
+* The OpenShift clusters are developed as "infrastructure-as-code" and as such managed via ArgoCD. This applies to the
   application resources, as well as custom resources for the cluster operators.
     * The datacenter and the backoffice resources are managed in a monorepo, since the resources are very similar
       anyway.
@@ -198,7 +198,7 @@ The datacenter holds master data for multiple objects: shops, pos devices, produ
     * Docker images where built and pushed directly using the quarkus plugins
 * We tried to use of ChatGPT to generate reasonable test data (e.g. existing fashion products with realistic prices).
   * It worked mostly well for master data (a few syntax errors)
-  * It didn't work for 1:n relations on large tables (trying to fill receiepts with positions). ChatGPT tends to forget
+  * It didn't work for 1:n relations on large tables (trying to fill receipts with positions). ChatGPT tends to forget
     its previous output.
   * We fell back to classic Python scripting to fill the gap.
 
