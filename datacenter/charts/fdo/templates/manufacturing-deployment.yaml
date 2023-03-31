@@ -86,7 +86,7 @@ spec:
             secretName: fdo-owner-cert
         - name: diun-cert
           secret:
-            secretName: fdo-diun-cert
+            secretName: fdo-diun
         - name: device-ca-cert
           secret:
             secretName: fdo-device-ca
