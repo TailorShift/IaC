@@ -11,5 +11,5 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: managed-premium
+  storageClassName: azurefile-csi
   volumeMode: Filesystem
