@@ -60,7 +60,7 @@ allowing data science analysis on the full dataset for improved insights.
 
 ### Architecture overview
 
-Our architecture is covering 3 zones through we data is flowing:
+Our architecture is covering 3 zones through which the data flows:
 
 * The PoS Edge device(s)
 * The backoffice(s)
