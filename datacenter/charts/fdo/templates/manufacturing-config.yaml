@@ -1,7 +1,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: manufacturing-server
+  name: fdo-manufacturing-server
   namespace: {{ .Release.Namespace }}
 data:
   convert-cert.sh: |-

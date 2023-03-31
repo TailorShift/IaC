@@ -1,19 +1,19 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: manufacturing-server
+  name: fdo-manufacturing-server
   namespace: {{ .Release.Namespace }}
   labels:
-    app: manufacturing-server
+    app: fdo-manufacturing-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: manufacturing-server
+      app: fdo-manufacturing-server
   template:
     metadata:
       labels:
-        app: manufacturing-server
+        app: fdo-manufacturing-server
     spec:
       initContainers:
         # CertManager can't create private keys in .der format yet
@@ -32,12 +32,27 @@ spec:
             - name: owner-cert
               mountPath: /keys/owner_cert.pem
               subPath: tls.crt
+            - name: manufacturer-cert
+              mountPath: /keys/manufacturer_cert.key
+              subPath: tls.key
+            - name: manufacturer-cert
+              mountPath: /keys/manufacturer_cert.pem
+              subPath: tls.crt
             - name: owner-cert
               mountPath: /keys/owner_cert.key
               subPath: tls.key
             - name: device-ca-cert
               mountPath: /keys/device_ca_cert.pem
               subPath: tls.crt
+            - name: device-ca-cert
+              mountPath: /keys/device_ca_cert.key
+              subPath: tls.key
+            - name: diun-cert
+              mountPath: /keys/diun_cert.pem
+              subPath: tls.crt
+            - name: diun-cert
+              mountPath: /keys/diun_cert.key
+              subPath: tls.key
       containers:
         - name: container
           image: quay.io/fido-fdo/manufacturing-server:main
@@ -58,10 +73,10 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: manufacturing-server
+            name: fdo-manufacturing-server
         - name: convert-script
           configMap:
-            name: manufacturing-server
+            name: fdo-manufacturing-server
             defaultMode: 077
         - name: manufacturer-cert
           secret:

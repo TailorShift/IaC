@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: manufacturing-server
+  name: fdo-manufacturing-server
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -9,4 +9,4 @@ spec:
       port: 80
       targetPort: 8080
   selector:
-    app: manufacturing-server
+    app: fdo-manufacturing-server
