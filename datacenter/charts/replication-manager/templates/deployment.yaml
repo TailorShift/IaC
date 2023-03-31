@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: container
-          image: 'quay.io/tailorshift/replication-manager:1.0.0-SNAPSHOT'
+          image: 'quay.io/tailorshift/replication-manager:1.0.0'
           ports:
             - containerPort: 8082
               protocol: TCP
