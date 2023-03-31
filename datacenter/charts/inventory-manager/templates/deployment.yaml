@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: container
-          image: 'quay.io/tailorshift/inventory-manager:1.0.0-SNAPSHOT'
+          image: 'quay.io/tailorshift/inventory-manager:1.0.0'
           ports:
             - containerPort: 8080
               protocol: TCP
