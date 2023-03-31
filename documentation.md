@@ -197,6 +197,8 @@ The datacenter holds master data for multiple objects: shops, pos devices, produ
       OpenShift features.
     * Docker images where built and pushed directly using the quarkus plugins
 
+## Appendix
+
 ### The technology stack
 
 As part of this hackfest we used the following technologies:
@@ -224,7 +226,7 @@ As part of this hackfest we used the following technologies:
 [1] not finished due to technical issues on ARO cluster \
 [2] backend services prepared in OpenShift but not used on edge side due to technical issues
 
-## Loose ends
+### Loose ends
 
 As per definition of a Hackfest we were working in proof of concept mode. As such we took a few shortcuts, that are not
 recommended for production usage / further development. For full transparency we list them here:
