@@ -72,6 +72,9 @@ spec:
         - name: diun-cert
           secret:
             secretName: fdo-diun-cert
+        - name: device-ca-cert
+          secret:
+            secretName: fdo-device-ca
         - name: stores
           persistentVolumeClaim:
             claimName: fdo-stores
