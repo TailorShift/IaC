@@ -7,10 +7,10 @@ data:
   convert-cert.sh: |-
     ls -lah /keys
     cp /keys/*.pem /etc/fdo/keys/
-    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/manufacturer_key.key -out /etc/fdo/keys/manufacturer_key.der -nocrypt
-    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/diun_cert.key -out /etc/fdo/keys/diun_cert.der -nocrypt
-    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/owner_cert.key -out /etc/fdo/keys/owner_cert.der -nocrypt
-    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/device_ca_key.key -out /etc/fdo/keys/device_ca_key.der -nocrypt
+    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/manufacturer_cert.key -out /etc/fdo/keys/manufacturer_key.der -nocrypt
+    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/diun_cert.key -out /etc/fdo/keys/diun_key.der -nocrypt
+    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/owner_cert.key -out /etc/fdo/keys/owner_key.der -nocrypt
+    openssl pkcs8 -topk8 -inform PEM -outform DER -in /keys/device_ca_cert.key -out /etc/fdo/keys/device_ca_key.der -nocrypt
     ls -lah /etc/fdo/keys
   config.yml: |-
     ---
