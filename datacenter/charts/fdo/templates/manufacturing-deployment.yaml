@@ -1,0 +1,79 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: manufacturing-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: manufacturing-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manufacturing-server
+  template:
+    metadata:
+      labels:
+        app: manufacturing-server
+    spec:
+      initContainers:
+        # CertManager can't create private keys in .der format yet
+        # (it's an experimental feature not activated)
+        # Thus we convert with openssl
+        - name: cert-converter
+          image: registry.redhat.io/ubi9/ubi
+          imagePullPolicy: Always
+          command: ['sh', '-c', '/script/convert-cert.sh']
+          volumeMounts:
+            - name: convert-script
+              mountPath: /script/convert-cert.sh
+              subPath: convert-cert.sh
+            - name: certs
+              mountPath: /etc/fdo/keys
+            - name: owner-cert
+              mountPath: /keys/owner_cert.pem
+              subPath: tls.crt
+            - name: owner-cert
+              mountPath: /keys/owner_cert.key
+              subPath: tls.key
+            - name: device-ca-cert
+              mountPath: /keys/device_ca_cert.pem
+              subPath: tls.crt
+      containers:
+        - name: container
+          image: quay.io/fido-fdo/manufacturing-server:main
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/fdo/manufacturing-server.conf.d/config.yml
+              subPath: config.yml
+            - name: certs
+              mountPath: /etc/fdo/keys/
+            - name: stores
+              mountPath: /etc/fdo/stores
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+        - name: config
+          configMap:
+            name: manufacturing-server
+        - name: convert-script
+          configMap:
+            name: manufacturing-server
+            defaultMode: 077
+        - name: manufacturer-cert
+          secret:
+            secretName: fdo-manufacturer-cert
+        - name: owner-cert
+          secret:
+            secretName: fdo-owner-cert
+        - name: diun-cert
+          secret:
+            secretName: fdo-diun-cert
+        - name: stores
+          persistentVolumeClaim:
+            claimName: fdo-stores
+        - name: certs
+          emptyDir: {}
