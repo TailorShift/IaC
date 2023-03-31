@@ -33,7 +33,8 @@ device, such as current shop prices, marketing offerings or surveys.
 The edge device is not just a simple point of sale. It can also offer customer-value service such as "what is the price
 of?" or "is this product available in other sizes / colors / stores?" features.
 
-Imagine new shop that offers only electronic payment: The device does no longer have to be in a dedicated "authorized-personnel-only" zone. Instead it could be placed or moved freely around in the shop. This allows making more
+Imagine new shop that offers only electronic payment: The device does no longer have to be in a dedicated "
+authorized-personnel-only" zone. Instead it could be placed or moved freely around in the shop. This allows making more
 efficient use of stores space. Furthermore it allows employees to get closer to the customer, increasing time available
 advising and engaging customers in a sale.
 
@@ -67,9 +68,69 @@ Our architecture is covering 3 zones through we data is flowing:
 
 ![Architecture Overvoew](docs/architecture_overview.png)
 
-The RHEL@Edge image is immutable. Application updates are controlled by updating the container images under the
-referenced image tag (requires device reboot).
 In both OpenShift zones we use ArgoCD to deploy and update all resources an applications.
+
+#### The PoS Edge device(s)
+
+The edge device is running a custom RHEL@Edge image with podman built with image builder.
+The applications are configured as systemd service running on podman as docker images. The latest image is pulled on
+startup, which simplifies the rollout process of new application versions.
+Init scripts in the boot process ensure onboarding with additional PKI assets from the datacenter and setting required
+environment variables.
+
+Both running applications are written from scratch and share no code with the example applications.
+Communication is completely synchronous via REST. On the ui layer we see a requirement for immediate responses to any
+actions, thus there is no asynchronous messaging involved.
+
+`tailorshift-ui` sends all calls following the new pos-manager API contract to the local `edge-proxy`. The edge-proxy
+acts as a man-in-the-middle to enhance the frontend calls with cryptographic signatures to verify the devices identity.
+
+Due to our remote development the device is simulated in a VM. Thus we skipped setting up a webbrowser in kiosk mode and
+forwarded the ports instead. The ui is simulating barcode scanner input (e.g. scanning product barcodes, employee
+authorization cards) by requesting numeric input instead.
+
+#### The backoffice(s)
+
+The backoffice is a single node OpenShift cluster. Due to our remote development we used the provisioned one by Atos.
+
+All data is persisted in a Postges database (provisioned by CrunchyDB). The database schema is managed by Flyway. For
+simplified development we use the same schema for both datacenters.
+
+The `pos-manager` is responsible for employee authorization, storing sales transactions, managing the inventory and
+product lookup (including stock) locally or even globally (calling the datacenter).
+
+When the `pos-manager` takes requests from the frontend, on each call it verifies the cryptographic headers added
+by `edge-proxy`to verify the validity of the device. The headers contain a device id (to lookup the correct public key
+in the database), a timestamp (to avoid replay-attacks) and a signature built out of both.
+
+`Debezium` running as a `Kafka` component reads sales transactions and puts them into Kafka messages.
+`MirrorMaker2` shifts these over to the datacenter. To export sales transactions safely into the datacenter, the
+transaction is stored as a json in a dedicated export table which is inserted in the same sql transaction. This approach
+is used to avoid foreign key constraint issues, as a replication of parent/child records via separate message on the
+broker could be consumed out of order.
+
+Incoming messages (from the datacenter MirrorMaker2) are processed by the `replication-manager` that takes care of
+inserting, updating or deleting master data. Compared to classic database replication, this - in theory - also decouples
+the database schemas in both clusters.
+
+#### The datacenter
+
+The datacenter is an OpenShift cluster on ARO (Azure).
+
+As with the backoffice, all data is persisted in a Postges database (provisioned by CrunchyDB). The database schema is
+managed by Flyway. For simplified development we use the same schema for both datacenters.
+
+Here, the `replication-manager` is responsible for inserting sales transactions coming from the shops.
+
+This allows the `inventory-manager` to give information about stock in all shops.
+
+Having all master and transaction data in one database, a RHODS `Jupyter Notebook` is used to analyse the data. In our
+example we utilized it to make sales forecasts on daily and weekly basis. These are then visualized in `Grafana`.
+
+Once registered as a device in the sql database, the `registration-service` can generate certificates (utilizing
+`CertManager`) and handing them to edge devices on startup. The service also listens to changes to device certificates
+and populates the pos_device table with the public key. Thanks to the replication logic, the publiy key is then
+replicated into the shop, where it is used to verfiy requests.
 
 ### Implemented processes and data flow
 
@@ -123,11 +184,18 @@ The datacenter holds master data for multiple objects: shops, pos devices, produ
 * (12) stores the predictions in tables in the datacenter database.
 * (13) The sales predictions are visualized in a Grafana dashboard.
 
+### Other considerations
 
-### Technology decisions & reasoning
-
-
-
+* The OpenShift clusters are developed as "infrastructure-as-code" and a such managed via ArgoCD. This applies to the
+  application resources, as well as custom resources for the cluster operators.
+    * The datacenter and the backoffice resources are managed in a monorepo, since the resources are very similar
+      anyway.
+    * For simplicity each cluster had its own independent instance of ArgoCD.
+    * Helm was used for templating the resources for multiple stages (development, prod)
+* Quarkus was used for all backend apps
+    * Due to the IaC approach, for Quarkus apps we just used the extensions for regular docker images and no particular
+      OpenShift features.
+    * Docker images where built and pushed directly using the quarkus plugins
 
 ### The technology stack
 
@@ -156,15 +224,15 @@ As part of this hackfest we used the following technologies:
 [1] not finished due to technical issues on ARO cluster \
 [2] backend services prepared in OpenShift but not used on edge side due to technical issues
 
-
-
 ## Loose ends
 
 As per definition of a Hackfest we were working in proof of concept mode. As such we took a few shortcuts, that are not
 recommended for production usage / further development. For full transparency we list them here:
 
 * DB: We use a single shared SQL database model across applications and clusters. This actually violates classic
-  microservice principles and could cause issues if the complexity raises with more services being added. However, the replication logic supports replicating into any (database) structure and is just an implementation detail of the replication manager.
+  microservice principles and could cause issues if the complexity raises with more services being added. However, the
+  replication logic supports replicating into any (database) structure and is just an implementation detail of the
+  replication manager.
 * Kafka: We did not optimize the Kafka cluster on the single node OpenShift. There is not much use to run a 3-node
   cluster on a single node. In a real world scenario it would save a lot of compute resources (and probably maintenance)
   to run single node Kafka on single node OpenShift
@@ -175,5 +243,8 @@ recommended for production usage / further development. For full transparency we
 * Data Science: Our prediction data pipeline in RHODS is "on demand". As we do not know the exact requirements of
   retail (e.g. seasons etc.) we did not set up any automation here.
 * Tekton pipelines could not be tested due to issues with the ARO cluster. They may or may not work.
-* Quarkus: We did not engage in minifying the resource footprint by utilizing native images. This was mostly done to speed up development iterations, as compiling into native images takes a lot of time. Activating native images is just one compile flag away!
-* Quarkus: We followed the principles of DDD: **Deadline** driven development. As such we skipped writing any kind of tests ;)
+* Quarkus: We did not engage in minifying the resource footprint by utilizing native images. This was mostly done to
+  speed up development iterations, as compiling into native images takes a lot of time. Activating native images is just
+  one compile flag away!
+* Quarkus: We followed the principles of DDD: **Deadline** driven development. As such we skipped writing any kind of
+  tests ;)
